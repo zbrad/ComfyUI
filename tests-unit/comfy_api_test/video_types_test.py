@@ -1348,3 +1348,19 @@ def test_cropped_decode_and_save_paths_select_same_pixels(tmp_path):
     assert save_column in (2, 3)
 
     assert decode_column == save_column
+
+
+def test_as_cropped_components_releases_uncropped_storage():
+    images = torch.rand(2, 8, 8, 3)
+    video = VideoFromComponents(
+        VideoComponents(images=images, frame_rate=Fraction(8))
+    )
+
+    cropped = video.as_cropped(0, 0, 4, 4)
+    cropped_images = cropped.get_components().images
+
+    assert tuple(cropped_images.shape[1:3]) == (4, 4)
+    assert (
+        cropped_images.untyped_storage().data_ptr()
+        != images.untyped_storage().data_ptr()
+    )

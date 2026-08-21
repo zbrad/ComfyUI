@@ -91,11 +91,11 @@ class VideoInput(ABC):
         cx, cy, cw, ch = rect
         return VideoFromComponents(
             VideoComponents(
-                images=components.images[:, cy:cy + ch, cx:cx + cw, :],
+                images=components.images[:, cy:cy + ch, cx:cx + cw, :].clone(),
                 audio=components.audio,
                 frame_rate=components.frame_rate,
                 metadata=components.metadata,
-                alpha=components.alpha[:, cy:cy + ch, cx:cx + cw]
+                alpha=components.alpha[:, cy:cy + ch, cx:cx + cw].clone()
                 if components.alpha is not None
                 else None,
             ),
