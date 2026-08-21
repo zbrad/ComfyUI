@@ -181,12 +181,18 @@ def video_stream_color_space(stream) -> str | None:
     return VIDEO_TRANSFER_COLOR_SPACES.get(stream.color_trc)
 
 
-def video_encoder_options(codec: VideoCodec, crf: float | None) -> dict[str, str]:
-    if crf is None:
-        return {}
-    if codec == VideoCodec.AV1 and crf == 0:
-        return {"svtav1-params": "lossless=1"}
-    return {"crf": str(crf)}
+def video_encoder_options(
+    codec: VideoCodec, crf: float | None, preset: str | None = None
+) -> dict[str, str]:
+    options = {}
+    if preset is not None and codec == VideoCodec.H264:
+        options["preset"] = preset
+    if crf is not None:
+        if codec == VideoCodec.AV1 and crf == 0:
+            options["svtav1-params"] = "lossless=1"
+        else:
+            options["crf"] = str(crf)
+    return options
 
 
 def webm_streams_compatible(streams) -> bool:
@@ -594,6 +600,7 @@ class VideoFromFile(VideoInput):
         bit_depth: int | None = None,
         crf: float | None = None,
         color_space: str | None = None,
+        preset: str | None = None,
     ):
         if color_space is not None and color_space not in VIDEO_COLOR_TRANSFERS:
             raise ValueError(f"Unsupported video color space: {color_space}")
@@ -632,7 +639,7 @@ class VideoFromFile(VideoInput):
             if not reuse_streams:
                 if bit_depth is None:
                     bit_depth = source_bit_depth
-                return self._save_transcoded(container, path, format=format, codec=codec, metadata=metadata, bit_depth=bit_depth, crf=crf, color_space=color_space)
+                return self._save_transcoded(container, path, format=format, codec=codec, metadata=metadata, bit_depth=bit_depth, crf=crf, color_space=color_space, preset=preset)
 
             streams = container.streams
 
@@ -667,6 +674,7 @@ class VideoFromFile(VideoInput):
         bit_depth: int,
         crf: float | None = None,
         color_space: str | None = None,
+        preset: str | None = None,
     ):
         """Re-encode one frame at a time; peak memory does not scale with video length."""
         open_kwargs, output_format, output_codec = video_output_config(path, format, codec)
@@ -844,7 +852,7 @@ class VideoFromFile(VideoInput):
                             out_video.width = out_width
                             out_video.height = out_height
                             out_video.pix_fmt = pix_fmt
-                            out_video.options = video_encoder_options(output_codec, crf)
+                            out_video.options = video_encoder_options(output_codec, crf, preset)
                             if preserve_source_color:
                                 copy_color_properties(video_stream, out_video.codec_context)
                             elif color_space is not None:
@@ -1074,6 +1082,7 @@ class VideoFromComponents(VideoInput):
         bit_depth: int | None = None,
         crf: float | None = None,
         color_space: str | None = None,
+        preset: str | None = None,
     ):
         """Save the video to a file path or BytesIO buffer."""
         if color_space is None:
@@ -1100,7 +1109,7 @@ class VideoFromComponents(VideoInput):
             video_stream.width = self.__components.images.shape[2]
             video_stream.height = self.__components.images.shape[1]
             video_stream.pix_fmt = pix_fmt
-            video_stream.options = video_encoder_options(output_codec, crf)
+            video_stream.options = video_encoder_options(output_codec, crf, preset)
             if color_space is not None:
                 set_video_color_properties(video_stream.codec_context, color_space)
 

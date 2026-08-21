@@ -361,6 +361,7 @@ def save_video_preview(video: Input.Video) -> ui.PreviewVideo:
         full_path,
         format=preview_format,
         codec="auto",
+        preset="ultrafast",
     )
     result = ui.SavedResult(file, subfolder, io.FolderType.temp)
     _preview_results[video] = (full_path, result)

@@ -1364,3 +1364,33 @@ def test_as_cropped_components_releases_uncropped_storage():
         cropped_images.untyped_storage().data_ptr()
         != images.untyped_storage().data_ptr()
     )
+
+
+def test_video_encoder_options_applies_h264_preset():
+    from comfy_api.latest._input_impl.video_types import video_encoder_options
+
+    assert video_encoder_options(VideoCodec.H264, None, "ultrafast") == {
+        "preset": "ultrafast"
+    }
+    assert video_encoder_options(VideoCodec.H264, 23.0, "ultrafast") == {
+        "preset": "ultrafast",
+        "crf": "23.0",
+    }
+    assert video_encoder_options(VideoCodec.H264, 23.0, None) == {"crf": "23.0"}
+    assert video_encoder_options(VideoCodec.AV1, None, "ultrafast") == {}
+    assert video_encoder_options(VideoCodec.AV1, 0, "ultrafast") == {
+        "svtav1-params": "lossless=1"
+    }
+
+
+def test_save_to_preset_transcodes_playable_output(tmp_path):
+    source = create_test_video(width=32, height=32)
+    try:
+        out = str(tmp_path / "preset.mp4")
+        VideoFromFile(source).as_cropped(0, 0, 16, 16).save_to(
+            out, preset="ultrafast"
+        )
+        saved = VideoFromFile(out).get_components()
+        assert tuple(saved.images.shape[1:3]) == (16, 16)
+    finally:
+        os.unlink(source)
