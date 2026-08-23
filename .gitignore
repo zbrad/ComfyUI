@@ -24,3 +24,6 @@ web_custom_versions/
 filtered-openapi.yaml
 uv.lock
 .comfy_environment
+
+# Local generation-time tracking log (personal run data, not repo content)
+/generation-log.jsonl
