@@ -18,6 +18,18 @@ venv*/
 !/web/extensions/core/
 /tests-ui/data/object_info.json
 /user/
+!/user/
+/user/*
+!/user/default/
+/user/default/*
+!/user/default/workflows/
+/user/default/workflows/*
+!/user/default/workflows/LTX-2.5 Text to Video (Dev).json
+!/user/default/workflows/LTX-2.5 Image to Video (Dev).json
+!/user/default/workflows/LTX-2.5 First Last Frame to Video (Dev).json
+!/user/default/workflows/LTX-2.5 Text to Video (Distilled fp8).json
+!/user/default/workflows/LTX-2.5 Image to Video (Distilled fp8).json
+!/user/default/workflows/LTX-2.5 First Last Frame to Video (Distilled fp8).json
 *.log
 web_custom_versions/
 .DS_Store
