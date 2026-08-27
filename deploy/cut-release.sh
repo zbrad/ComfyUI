@@ -6,7 +6,15 @@ set -euo pipefail
 
 DEV_REPO=/home/zbrad/gh/ComfyUI
 RELEASES_DIR=/home/zbrad/gh/ComfyUI-releases/releases
+# Directories AND the one shared log file below all have the same
+# property: they're gitignored, so `git worktree add` has nothing tracked
+# to check out there. Symlinking them back to DEV_REPO keeps them as one
+# continuous shared thing across every release instead of each release
+# silently starting its own empty copy (129G models/, and for
+# generation-log.jsonl specifically: a fragmented, no-longer-"ongoing"
+# performance log).
 SHARED_DIRS=(.venv models output input temp user custom_nodes)
+SHARED_FILES=(generation-log.jsonl)
 
 COMMITISH="${1:-HEAD}"
 
@@ -28,6 +36,12 @@ for d in "${SHARED_DIRS[@]}"; do
     # fixed whitelist above, not user input.
     rm -rf "${REL:?}/${d}"
     ln -s "${DEV_REPO}/${d}" "${REL}/${d}"
+done
+
+for f in "${SHARED_FILES[@]}"; do
+    touch "${DEV_REPO}/${f}"  # so the symlink target exists even before any run has logged anything
+    rm -f "${REL:?}/${f}"
+    ln -s "${DEV_REPO}/${f}" "${REL}/${f}"
 done
 
 echo "Release ready: $REL"

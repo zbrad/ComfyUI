@@ -51,13 +51,22 @@ class GenerationLogger:
         self._log_path = log_path
         self._output_dir = output_dir
 
-    def record(self, prompt_id: str, server: str, note: str) -> None:
+    def record(
+        self,
+        prompt_id: str,
+        server: str,
+        note: str,
+        resource_stats: Optional[dict[str, object]] = None,
+    ) -> None:
         """Fetch a completed run's timing/params from /history and log it.
 
         Args:
             prompt_id: The ComfyUI prompt id to look up.
             server: Base URL of the running ComfyUI server.
             note: Free-text note to attach to the log entry.
+            resource_stats: Optional GPU/RAM/page-fault stats gathered
+                during the run (see resource_watcher.py), attached to the
+                log entry under "resource" if given.
         """
         hist = self._get(f"{server.rstrip('/')}/history/{prompt_id}")
         entry = hist.get(prompt_id)
@@ -130,6 +139,8 @@ class GenerationLogger:
             "fps": probed.get("fps"),
             "note": note,
         }
+        if resource_stats is not None:
+            record["resource"] = resource_stats
         with open(self._log_path, "a", encoding="utf-8") as f:
             f.write(json.dumps(record) + "\n")
         print(f"Logged: {json.dumps(record)}")
