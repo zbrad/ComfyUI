@@ -54,16 +54,44 @@ the shared `.venv` separately.
   consuming a single undo.
 - `list-releases.sh` — list all release worktrees with their commit and
   timestamp, marking the currently active one.
+- `test-and-deploy.sh <commit-ish>` — the actual "build passed testing, now
+  deploy" gate. Cuts a release, boots it as a **separate, local-only
+  instance on `TEST_PORT`** (`127.0.0.1:8189` by default — distinct from
+  the real service's `100.112.80.10:8188`, so testing never touches or
+  contends with the live service), runs `tests-unit/` against it, and only
+  then calls `activate-release.sh` on the real port. The test instance is
+  always torn down before production is touched — on failure it's killed
+  and production is left alone with the failed release kept on disk for
+  inspection; on success it's stopped first (freeing GPU/CUDA state) and
+  *then* the real restart happens, so the two are never running against
+  the model-loading GPU at the same time. Set `INTEGRATION_TEST_CMD` to
+  also run a live/workflow-level check against the test instance before
+  it's torn down (invoked with `COMFYUI_TEST_URL` set to its base URL) —
+  nothing is wired in by default beyond `tests-unit/`.
+
+`test-and-deploy.sh` needs `tests-unit/requirements.txt` (pytest etc.)
+installed in the shared `.venv` — it's a separate, torch-free dependency
+set from the app's own requirements, so it's not there by default:
+`.venv/bin/pip install -r tests-unit/requirements.txt` (one-time, respects
+the venv's existing torch-pin constraint).
 
 ## Typical flow
 
 ```
 cd ~/gh/ComfyUI
 git commit -am "..."                    # normal dev work on zbrad-local
+deploy/test-and-deploy.sh HEAD          # tests on :8189, deploys to :8188 only if they pass
+# ... service now running the new release; if it's bad anyway:
+deploy/rollback.sh
+```
+
+Lower-level flow without the test gate (e.g. deploying a commit you've
+already validated some other way):
+
+```
 deploy/cut-release.sh                   # cuts a release at HEAD
 deploy/activate-release.sh <printed-path-or-sha>
-# ... service now running the new release; if it's bad:
-deploy/rollback.sh
+deploy/rollback.sh                      # if it's bad
 ```
 
 Old release worktrees are not auto-pruned — remove one with
