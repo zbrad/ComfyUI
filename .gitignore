@@ -30,6 +30,13 @@ venv*/
 !/user/default/workflows/LTX-2.5 Text to Video (Distilled fp8).json
 !/user/default/workflows/LTX-2.5 Image to Video (Distilled fp8).json
 !/user/default/workflows/LTX-2.5 First Last Frame to Video (Distilled fp8).json
+!/user/default/workflows/examples/
+/user/default/workflows/examples/*
+!/user/default/workflows/examples/ltxv-current/
+/user/default/workflows/examples/ltxv-current/*
+!/user/default/workflows/examples/ltxv-current/video_ltx2_5_t2v.json
+!/user/default/workflows/examples/ltxv-current/video_ltx2_5_i2v.json
+!/user/default/workflows/examples/ltxv-current/video_ltx2_5_flf2v.json
 *.log
 web_custom_versions/
 .DS_Store
