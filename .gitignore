@@ -37,6 +37,10 @@ venv*/
 !/user/default/workflows/examples/ltxv-current/video_ltx2_5_t2v.json
 !/user/default/workflows/examples/ltxv-current/video_ltx2_5_i2v.json
 !/user/default/workflows/examples/ltxv-current/video_ltx2_5_flf2v.json
+!/user/default/workflows/examples/ltxv-current/video_ltx2_5_ic_lora.json
+!/user/default/workflows/examples/ltxv-current/video_ltx2_5_ia2v.json
+!/user/default/workflows/examples/ltxv-current/video_ltx2_5_style_transition.json
+!/user/default/workflows/examples/ltxv-current/video_ltx2_5_id_lora.json
 *.log
 web_custom_versions/
 .DS_Store
