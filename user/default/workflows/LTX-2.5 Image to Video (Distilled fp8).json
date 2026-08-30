@@ -439,7 +439,7 @@
         },
         "revision": 0,
         "config": {},
-        "name": "Image to Video (LTX-2.5) Distilled bf16",
+        "name": "Image to Video (LTX-2.5) Distilled fp8",
         "inputNode": {
           "id": -10,
           "bounding": [
