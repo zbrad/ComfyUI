@@ -410,7 +410,7 @@
         },
         "revision": 0,
         "config": {},
-        "name": "First & Last Frame to Video (LTX-2.5) (Dev)",
+        "name": "First & Last Frame to Video (LTX-2.5, Dev)",
         "inputNode": {
           "id": -10,
           "bounding": [
