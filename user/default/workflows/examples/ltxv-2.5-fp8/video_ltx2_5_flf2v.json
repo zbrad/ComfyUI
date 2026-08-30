@@ -410,7 +410,7 @@
         },
         "revision": 0,
         "config": {},
-        "name": "First & Last Frame to Video (LTX-2.5)",
+        "name": "First & Last Frame to Video (LTX-2.5, Distilled fp8)",
         "inputNode": {
           "id": -10,
           "bounding": [
