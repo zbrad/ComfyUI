@@ -70,19 +70,23 @@ the shared `.venv` separately.
   not wired in by default, but `integration_test.sh` (below) is a
   ready-made option.
 - `integration_test.sh` — point `INTEGRATION_TEST_CMD` at this to queue a
-  real workflow through `test_workflow_headless.py` against the isolated
-  test instance before every deploy: `INTEGRATION_TEST_CMD=deploy/integration_test.sh
+  real workflow through
+  [zbrad/comfyui-test-integrations](https://github.com/zbrad/comfyui-test-integrations)'
+  `test_workflow_headless.py` against the isolated test instance before
+  every deploy: `INTEGRATION_TEST_CMD=deploy/integration_test.sh
   deploy/test-and-deploy.sh HEAD`. Drives an actual headless browser
   (Playwright) so this exercises ComfyUI's real `app.graphToPrompt()`/
   `app.queuePrompt()`, not a hand-rolled reimplementation of that
-  conversion — see `test_workflow_headless.py`'s own docstring for why
-  that distinction matters. Defaults to the plain `Text to Video
+  conversion — see that repo's `test_workflow_headless.py` docstring for
+  why that distinction matters. Defaults to the plain `Text to Video
   (LTX-2.5)` blueprint (no image input to wire up, fastest of the three
   LTX-2.5 blueprints); override `WORKFLOW_PATH`/`INTEGRATION_TEST_PROMPT`/
   `INTEGRATION_TEST_TIMEOUT` to point at a different one. Needs
-  `playwright` + a downloaded Chromium in the shared `.venv` (already
-  there as of this writing; `.venv/bin/python3 -m playwright install
-  chromium` if not).
+  `comfyui-test-integrations` cloned as a sibling of this repo
+  (`../comfyui-test-integrations`, override via `HARNESS_REPO`) and its
+  `requirements.txt` (`playwright`, `mcp`) installed into the shared
+  `.venv`, plus a downloaded Chromium (already there as of this writing;
+  `.venv/bin/python3 -m playwright install chromium` if not).
 
 `test-and-deploy.sh` needs `tests-unit/requirements.txt` (pytest etc.)
 installed in the shared `.venv` — it's a separate, torch-free dependency

@@ -4,12 +4,21 @@
 #
 # Queues a real workflow against the isolated test instance
 # test-and-deploy.sh already booted (COMFYUI_TEST_URL, set by that
-# script -- required here) via test_workflow_headless.py, which drives an
-# actual headless browser so this exercises the same app.graphToPrompt()/
-# app.queuePrompt() path a real user's click would, not just an API-format
-# reimplementation. Exit code propagates: 0 keeps the deploy going, nonzero
-# stops it before production is touched (test-and-deploy.sh's own
-# behavior, not anything special here).
+# script -- required here) via zbrad/comfyui-test-integrations'
+# test_workflow_headless.py, which drives an actual headless browser so
+# this exercises the same app.graphToPrompt()/app.queuePrompt() path a
+# real user's click would, not just an API-format reimplementation.
+# Exit code propagates: 0 keeps the deploy going, nonzero stops it
+# before production is touched (test-and-deploy.sh's own behavior, not
+# anything special here).
+#
+# Depends on https://github.com/zbrad/comfyui-test-integrations cloned
+# as a sibling of this repo (../comfyui-test-integrations) -- originally
+# built in this repo, generalized out since neither the harness nor the
+# MCP server is actually ComfyUI-fork-specific. Its playwright/mcp deps
+# go in this repo's shared .venv (torch-free, respects the torch-pin
+# constraint): `.venv/bin/pip install -r
+# ../comfyui-test-integrations/requirements.txt`.
 #
 # Defaults to the plain Text to Video (LTX-2.5) blueprint -- no image
 # input to wire up, fastest of the three LTX-2.5 blueprints, and
@@ -23,6 +32,7 @@
 set -euo pipefail
 
 DEV_REPO=/home/zbrad/gh/ComfyUI
+HARNESS_REPO="${HARNESS_REPO:-$DEV_REPO/../comfyui-test-integrations}"
 WORKFLOW_PATH="${WORKFLOW_PATH:-$DEV_REPO/blueprints/Text to Video (LTX-2.5).json}"
 INTEGRATION_TEST_PROMPT="${INTEGRATION_TEST_PROMPT:-A single red apple resting on a plain wooden table, soft natural light, static camera, three seconds.}"
 INTEGRATION_TEST_TIMEOUT="${INTEGRATION_TEST_TIMEOUT:-300}"
@@ -33,7 +43,7 @@ if [ -z "${COMFYUI_TEST_URL:-}" ]; then
     exit 1
 fi
 
-"$DEV_REPO/.venv/bin/python3" "$DEV_REPO/test_workflow_headless.py" \
+"$DEV_REPO/.venv/bin/python3" "$HARNESS_REPO/test_workflow_headless.py" \
     "$WORKFLOW_PATH" \
     --url "$COMFYUI_TEST_URL" \
     --prompt "$INTEGRATION_TEST_PROMPT" \
