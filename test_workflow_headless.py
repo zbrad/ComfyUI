@@ -40,8 +40,15 @@ Usage:
     --timeout         Seconds to wait for execution to finish (default 900).
 
 Exit code 0 on successful completion, 1 on any failure (load error,
-queueing rejected, execution error, or timeout). Prints the final
-`/history` outputs on success.
+queueing rejected, execution error, or timeout). Prints progress to
+stderr and the final `/history` outputs (as JSON) to stdout on success.
+
+Also importable as a library -- prepare_workflow() + run() are what
+comfyui_mcp_server.py wraps as an MCP tool, so multiple agent tools
+(not just this CLI) can share one implementation. All progress output
+goes to stderr specifically so this stays safe to import into an MCP
+stdio server, whose stdout is reserved for the JSON-RPC protocol
+stream -- a stray print() to stdout there would corrupt it.
 """
 
 import argparse
@@ -52,6 +59,10 @@ import time
 import urllib.request
 
 from playwright.sync_api import sync_playwright
+
+
+def _log(*args: object) -> None:
+    print(*args, file=sys.stderr)
 
 SUBGRAPH_TYPE_RE = re.compile(
     r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
@@ -120,7 +131,7 @@ def attach_output_node_if_missing(workflow: dict) -> dict:
     )
     workflow["last_node_id"] = max(workflow.get("last_node_id", 0), new_node_id)
     workflow["last_link_id"] = max(workflow.get("last_link_id", 0), new_link_id)
-    print(f"[+] attached {spec['type']} to the dangling {out['type']} output")
+    _log(f"[+] attached {spec['type']} to the dangling {out['type']} output")
     return workflow
 
 
@@ -149,7 +160,30 @@ def set_prompt_text(workflow: dict, text: str) -> None:
     raise ValueError("no string widget found to set --prompt into")
 
 
-def run(base_url: str, workflow: dict, timeout: float) -> int:
+def prepare_workflow(workflow: dict, prompt: str | None = None) -> dict:
+    """Apply the same prep the CLI does -- attach a Save node onto a bare
+    blueprint's dangling output, optionally override the prompt text --
+    shared by the CLI and the MCP tool so there's exactly one code path.
+    """
+    workflow = attach_output_node_if_missing(workflow)
+    if prompt is not None:
+        set_prompt_text(workflow, prompt)
+    return workflow
+
+
+def run(base_url: str, workflow: dict, timeout: float) -> dict:
+    """Queue `workflow` against a running ComfyUI at `base_url` and wait
+    up to `timeout` seconds for it to finish.
+
+    Returns a structured result, always with a `success` bool and a
+    `stage` naming where it stopped if not:
+        {"success": False, "stage": "load_graph_data", "error": "..."}
+        {"success": False, "stage": "queue_prompt", "error": "...", "console_errors": [...]}
+        {"success": False, "stage": "queue_lookup", "error": "..."}
+        {"success": False, "stage": "execution", "prompt_id": "...", "status": {...}}
+        {"success": False, "stage": "timeout", "prompt_id": "..."}
+        {"success": True, "prompt_id": "...", "outputs": {...}}
+    """
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
@@ -159,17 +193,30 @@ def run(base_url: str, workflow: dict, timeout: float) -> int:
             lambda msg: console_errors.append(msg.text) if msg.type == "error" else None,
         )
 
-        print(f"[+] loading {base_url} ...")
+        # Capture the POST /prompt response directly rather than diffing
+        # /queue before/after: a job whose inputs are fully cache-hit from
+        # a previous run (identical prompt/graph, common when re-testing
+        # the same blueprint) can complete and leave the queue in well
+        # under a second -- faster than any polling loop reliably catches
+        # a "new" arrival. The backend's own response is authoritative and
+        # has no such race.
+        prompt_response = {}
+
+        def _on_response(resp):
+            if resp.request.method == "POST" and resp.url.rstrip("/").endswith("/prompt"):
+                try:
+                    prompt_response["body"] = resp.json()
+                except Exception as e:  # noqa: BLE001 - best effort capture
+                    prompt_response["parse_error"] = str(e)
+
+        page.on("response", _on_response)
+
+        _log(f"[+] loading {base_url} ...")
         page.goto(base_url, wait_until="networkidle", timeout=60000)
         page.wait_for_function("window.app && window.app.graph", timeout=30000)
-        print("[+] app ready")
+        _log("[+] app ready")
 
-        before_queue = http_get_json(f"{base_url}/queue")
-        before_ids = {
-            item[1] for item in before_queue.get("queue_running", []) + before_queue.get("queue_pending", [])
-        }
-
-        print("[+] loading workflow into the graph via app.loadGraphData() ...")
+        _log("[+] loading workflow into the graph via app.loadGraphData() ...")
         load_result = page.evaluate(
             """async (wf) => {
                 try {
@@ -182,12 +229,12 @@ def run(base_url: str, workflow: dict, timeout: float) -> int:
             workflow,
         )
         if not load_result["ok"]:
-            print("[!] loadGraphData failed:", load_result["error"])
+            _log("[!] loadGraphData failed:", load_result["error"])
             browser.close()
-            return 1
-        print("[+] workflow loaded")
+            return {"success": False, "stage": "load_graph_data", "error": load_result["error"]}
+        _log("[+] workflow loaded")
 
-        print("[+] queueing via app.queuePrompt(0, 1) ...")
+        _log("[+] queueing via app.queuePrompt(0, 1) ...")
         queue_result = page.evaluate(
             """async () => {
                 try {
@@ -198,30 +245,41 @@ def run(base_url: str, workflow: dict, timeout: float) -> int:
                 }
             }"""
         )
-        print("[+] queuePrompt result:", queue_result)
+        _log("[+] queuePrompt result:", queue_result)
         if not queue_result["ok"] or not queue_result.get("queued"):
-            print("[!] queueing failed or was rejected")
+            _log("[!] queueing failed or was rejected")
             for e in console_errors[-20:]:
-                print("    [console]", e)
+                _log("    [console]", e)
             browser.close()
-            return 1
+            return {
+                "success": False,
+                "stage": "queue_prompt",
+                "error": queue_result.get("error", "queuePrompt returned false"),
+                "console_errors": console_errors[-20:],
+            }
 
-        prompt_id = None
-        for _ in range(20):
-            q = http_get_json(f"{base_url}/queue")
-            items = q.get("queue_running", []) + q.get("queue_pending", [])
-            new_ids = [item[1] for item in items if item[1] not in before_ids]
-            if new_ids:
-                prompt_id = new_ids[-1]
+        # The response listener is async relative to our page.evaluate call
+        # above; queuePrompt() resolving doesn't guarantee the response
+        # handler has run yet, so give it a brief moment.
+        for _ in range(50):
+            if "body" in prompt_response or "parse_error" in prompt_response:
                 break
-            time.sleep(1)
+            time.sleep(0.1)
 
         browser.close()  # execution happens server-side; the page isn't needed anymore
 
-    if prompt_id is None:
-        print("[!] never saw the job land in /queue")
-        return 1
-    print(f"[+] prompt_id = {prompt_id}, polling /history ...")
+    if "parse_error" in prompt_response:
+        _log("[!] failed to parse POST /prompt response:", prompt_response["parse_error"])
+        return {"success": False, "stage": "queue_lookup", "error": prompt_response["parse_error"]}
+    body = prompt_response.get("body")
+    if not body or "prompt_id" not in body:
+        _log("[!] never captured a POST /prompt response with a prompt_id")
+        return {"success": False, "stage": "queue_lookup", "error": "no prompt_id in POST /prompt response"}
+    if body.get("node_errors"):
+        _log("[!] server rejected the prompt:", body["node_errors"])
+        return {"success": False, "stage": "queue_lookup", "error": "node_errors", "node_errors": body["node_errors"]}
+    prompt_id = body["prompt_id"]
+    _log(f"[+] prompt_id = {prompt_id}, polling /history ...")
 
     deadline = time.time() + timeout
     last_status = None
@@ -231,20 +289,21 @@ def run(base_url: str, workflow: dict, timeout: float) -> int:
         if entry:
             status = entry.get("status", {})
             if status != last_status:
-                print("[+] status:", status)
+                _log("[+] status:", status)
                 last_status = status
             if status.get("completed") is True:
-                print("[✓] execution completed successfully")
-                print(json.dumps(entry.get("outputs", {}), indent=2)[:2000])
-                return 0
+                _log("[✓] execution completed successfully")
+                outputs = entry.get("outputs", {})
+                _log(json.dumps(outputs, indent=2)[:2000])
+                return {"success": True, "prompt_id": prompt_id, "outputs": outputs}
             if status.get("status_str") == "error":
-                print("[✗] execution error:")
-                print(json.dumps(status, indent=2))
-                return 1
+                _log("[✗] execution error:")
+                _log(json.dumps(status, indent=2))
+                return {"success": False, "stage": "execution", "prompt_id": prompt_id, "status": status}
         time.sleep(3)
 
-    print("[!] timed out waiting for completion")
-    return 1
+    _log("[!] timed out waiting for completion")
+    return {"success": False, "stage": "timeout", "prompt_id": prompt_id}
 
 
 def main() -> int:
@@ -256,11 +315,11 @@ def main() -> int:
     args = ap.parse_args()
 
     workflow = json.loads(open(args.workflow, encoding="utf-8").read())
-    workflow = attach_output_node_if_missing(workflow)
-    if args.prompt is not None:
-        set_prompt_text(workflow, args.prompt)
+    workflow = prepare_workflow(workflow, args.prompt)
 
-    return run(args.url, workflow, args.timeout)
+    result = run(args.url, workflow, args.timeout)
+    print(json.dumps(result, indent=2))
+    return 0 if result["success"] else 1
 
 
 if __name__ == "__main__":

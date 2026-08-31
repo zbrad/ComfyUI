@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "comfyui-workflow-runner": {
+      "command": "python3",
+      "args": ["comfyui_mcp_server.py"]
+    }
+  }
+}
