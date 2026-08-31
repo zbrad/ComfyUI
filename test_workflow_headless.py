@@ -86,26 +86,32 @@ def http_get_json(url: str) -> dict:
 
 
 def attach_output_node_if_missing(workflow: dict) -> dict:
-    """If the workflow's sole top-level node has a dangling VIDEO/IMAGE
-    output (the blueprint convention), attach a matching Save node so
-    there is something for ComfyUI to actually execute. Left alone if the
-    workflow already has an output node.
+    """If any subgraph-instance node (the blueprint convention -- a node
+    whose type is a subgraph UUID) has a dangling VIDEO/IMAGE output,
+    attach a matching Save node so there is something for ComfyUI to
+    actually execute. Left alone if there's no such dangling output --
+    e.g. the workflow already has an output node, or (for a blueprint
+    that also needs input nodes wired up, such as an image input) the
+    caller already attached one.
+
+    Deliberately keyed on node *type* (a subgraph instance), not "the
+    workflow has exactly one node" -- a blueprint that needs input nodes
+    wired to it (LoadImage for an image-to-video blueprint, say) is no
+    longer a single-node graph, but its output can still be dangling.
     """
     nodes = workflow.get("nodes", [])
     subgraph_nodes = [n for n in nodes if SUBGRAPH_TYPE_RE.match(n.get("type", ""))]
-    if len(nodes) != 1 or len(subgraph_nodes) != 1:
-        return workflow  # not the single-subgraph blueprint shape; assume complete
 
-    node = subgraph_nodes[0]
     dangling = [
-        (i, out)
+        (node, i, out)
+        for node in subgraph_nodes
         for i, out in enumerate(node.get("outputs", []))
         if out.get("type") in SAVE_NODE_FOR_OUTPUT_TYPE and not out.get("links")
     ]
     if not dangling:
         return workflow
 
-    slot_index, out = dangling[0]
+    node, slot_index, out = dangling[0]
     spec = SAVE_NODE_FOR_OUTPUT_TYPE[out["type"]]
 
     new_node_id = max((n["id"] for n in nodes), default=0) + 1
