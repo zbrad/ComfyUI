@@ -67,7 +67,22 @@ the shared `.venv` separately.
   the model-loading GPU at the same time. Set `INTEGRATION_TEST_CMD` to
   also run a live/workflow-level check against the test instance before
   it's torn down (invoked with `COMFYUI_TEST_URL` set to its base URL) —
-  nothing is wired in by default beyond `tests-unit/`.
+  not wired in by default, but `integration_test.sh` (below) is a
+  ready-made option.
+- `integration_test.sh` — point `INTEGRATION_TEST_CMD` at this to queue a
+  real workflow through `test_workflow_headless.py` against the isolated
+  test instance before every deploy: `INTEGRATION_TEST_CMD=deploy/integration_test.sh
+  deploy/test-and-deploy.sh HEAD`. Drives an actual headless browser
+  (Playwright) so this exercises ComfyUI's real `app.graphToPrompt()`/
+  `app.queuePrompt()`, not a hand-rolled reimplementation of that
+  conversion — see `test_workflow_headless.py`'s own docstring for why
+  that distinction matters. Defaults to the plain `Text to Video
+  (LTX-2.5)` blueprint (no image input to wire up, fastest of the three
+  LTX-2.5 blueprints); override `WORKFLOW_PATH`/`INTEGRATION_TEST_PROMPT`/
+  `INTEGRATION_TEST_TIMEOUT` to point at a different one. Needs
+  `playwright` + a downloaded Chromium in the shared `.venv` (already
+  there as of this writing; `.venv/bin/python3 -m playwright install
+  chromium` if not).
 
 `test-and-deploy.sh` needs `tests-unit/requirements.txt` (pytest etc.)
 installed in the shared `.venv` — it's a separate, torch-free dependency
@@ -80,7 +95,9 @@ the venv's existing torch-pin constraint).
 ```
 cd ~/gh/ComfyUI
 git commit -am "..."                    # normal dev work on zbrad-local
-deploy/test-and-deploy.sh HEAD          # tests on :8189, deploys to :8188 only if they pass
+INTEGRATION_TEST_CMD=deploy/integration_test.sh deploy/test-and-deploy.sh HEAD
+                                         # tests-unit/ + a real queued workflow on :8189,
+                                         # deploys to :8188 only if both pass
 # ... service now running the new release; if it's bad anyway:
 deploy/rollback.sh
 ```
