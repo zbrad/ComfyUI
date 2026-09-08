@@ -9,10 +9,12 @@ nemo.sh/nemo-<alias>.service until a 2026-09-08 rename) is the process
 that actually caused the 2026-09-06 incident, and its own check_mem
 gates ITS OWN start against a resident ComfyUI job (via /proc/meminfo
 MemAvailable), but nothing previously covered the mirror-image case:
-ComfyUI starting a big generation while another model is already loaded.
-That's the other half of that incident's actual collision shape (see
-~/.claude/projects/-home-zbrad/memory/llmsrv_watchdog_and_memorymax_plan.md,
-"Also flagged, out of scope for this plan").
+ComfyUI starting a big generation while another model is already loaded
+-- the other half of that incident's actual collision shape. See
+llama.cpp's docs/gb10/llmsrv-launcher.md ("Memory safety on unified
+memory" section) for the full incident writeup and why MemAvailable,
+not cgroup accounting, is the signal that actually works on this
+platform.
 
 Deliberately NOT a fixed-MemAvailable-floor gate: generation-log.jsonl
 shows RAM staying elevated (79-117GiB) across consecutive real jobs, even
