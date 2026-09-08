@@ -15,7 +15,7 @@ import importlib.util
 import shutil
 import importlib.metadata
 import folder_paths
-import nemo_collision_guard
+import model_collision_guard
 import time
 from comfy.cli_args import enables_dynamic_vram
 from app.logger import setup_logger
@@ -391,7 +391,7 @@ def prompt_worker(q, server_instance):
                 extra_data[k] = sensitive[k]
 
             asset_seeder.pause()
-            nemo_collision_guard.warn_if_nemo_resident()
+            model_collision_guard.warn_if_other_model_resident()
             e.execute(item[2], prompt_id, extra_data, item[4])
 
             need_gc = True
