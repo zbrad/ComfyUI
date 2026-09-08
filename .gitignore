@@ -42,6 +42,7 @@ venv*/
 !/user/default/workflows/examples/ltxv-2.5-fp8/video_ltx2_5_style_transition.json
 !/user/default/workflows/examples/ltxv-2.5-fp8/video_ltx2_5_id_lora.json
 !/user/default/workflows/examples/ltxv-2.5-fp8/video_ltx2_5_ic_lora_ingredients.json
+!/user/default/workflows/examples/ltxv-2.5-fp8/video_ltx2_5_pixel_spatial_upscaler.json
 !/user/default/workflows/examples/ltxv-2.5-bf16/
 /user/default/workflows/examples/ltxv-2.5-bf16/*
 !/user/default/workflows/examples/ltxv-2.5-bf16/video_ltx2_5_t2v.json
@@ -52,6 +53,7 @@ venv*/
 !/user/default/workflows/examples/ltxv-2.5-bf16/video_ltx2_5_style_transition.json
 !/user/default/workflows/examples/ltxv-2.5-bf16/video_ltx2_5_id_lora.json
 !/user/default/workflows/examples/ltxv-2.5-bf16/video_ltx2_5_ic_lora_ingredients.json
+!/user/default/workflows/examples/ltxv-2.5-bf16/video_ltx2_5_pixel_spatial_upscaler.json
 !/user/default/workflows/examples/ltxv-2.5-dev/
 /user/default/workflows/examples/ltxv-2.5-dev/*
 !/user/default/workflows/examples/ltxv-2.5-dev/video_ltx2_5_t2v.json
