@@ -4,13 +4,14 @@ context on this box.
 
 GB10's unified memory is shared between ComfyUI and any other model
 server sharing the box -- there is no separate VRAM pool to protect
-either side. llama.cpp's nemo.sh (nemo-<alias>.service) is the process
+either side. llama.cpp's llmsrv.sh (llmsrv-<alias>.service, formerly
+nemo.sh/nemo-<alias>.service until a 2026-09-08 rename) is the process
 that actually caused the 2026-09-06 incident, and its own check_mem
 gates ITS OWN start against a resident ComfyUI job (via /proc/meminfo
 MemAvailable), but nothing previously covered the mirror-image case:
 ComfyUI starting a big generation while another model is already loaded.
 That's the other half of that incident's actual collision shape (see
-~/.claude/projects/-home-zbrad/memory/nemo_watchdog_and_memorymax_plan.md,
+~/.claude/projects/-home-zbrad/memory/llmsrv_watchdog_and_memorymax_plan.md,
 "Also flagged, out of scope for this plan").
 
 Deliberately NOT a fixed-MemAvailable-floor gate: generation-log.jsonl
@@ -23,15 +24,15 @@ external collision.
 
 Deliberately NOT a systemd-unit-name pattern list either (the first
 version of this module was): that only catches launchers with a known,
-enumerated unit name -- nemo.sh's nemo-<alias>.service, or Ollama's
+enumerated unit name -- llmsrv.sh's llmsrv-<alias>.service, or Ollama's
 system-wide ollama.service. It misses a bare `llama-server` invoked
-directly (no nemo.sh wrapper) or a vLLM instance entirely, since neither
-has an established systemd-unit convention on this fleet. Checking
-`nvidia-smi --query-compute-apps` instead is launcher-agnostic -- it
-lists every process actually holding a CUDA context, regardless of how
-it was started, confirmed live (2026-09-08) to correctly show nemo.sh's
-llama-server as a distinct PID from ComfyUI's own. It's also simpler:
-no pattern list to keep growing as new launchers show up.
+directly (no llmsrv.sh wrapper) or a vLLM instance entirely, since
+neither has an established systemd-unit convention on this fleet.
+Checking `nvidia-smi --query-compute-apps` instead is launcher-agnostic
+-- it lists every process actually holding a CUDA context, regardless of
+how it was started, confirmed live (2026-09-08) to correctly show
+llmsrv.sh's llama-server as a distinct PID from ComfyUI's own. It's also
+simpler: no pattern list to keep growing as new launchers show up.
 
 Warn-only: a queued prompt may represent minutes of a user's prior work,
 so this never discards or delays it -- only logs, so the operator has a
