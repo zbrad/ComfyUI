@@ -1,0 +1,243 @@
+# Open-version snapshot of this ComfyUI .venv (node-gb10-1, tuned-builds branch,
+# 2026-09-15) -- 221 installed packages, floors instead of exact pins, so a
+# fresh `pip install -r` on another machine picks up compatible newer
+# releases rather than reproducing this exact frozen state byte-for-byte.
+# Generated from `pip list --format=freeze`; NOT a replacement for the
+# app-level requirements.txt / requirements-no-torch.txt at repo root.
+#
+# Packages below with a local build tag (+gb10.cu133, +gitXXXX) or a
+# .dev/pre-release version are excluded from the open floors or called out
+# explicitly, since ">=" against a local-tagged or dev version does not mean
+# what it would for a normal release -- see notes:
+
+# torch: GB10-tuned custom build (2.14.0.dev20260707+gitc36325c5ba.gb10.cu133)
+#   -- do NOT pip-install; build via the tuned-builds pipeline (tuned-common.sh
+#   / the pytorch repo's own tuned/ build scripts).
+# flash_attn: GB10-tuned custom build (2.8.4+gb10.cu133) -- do NOT pip-install;
+#   build via the tuned-builds pipeline (ZBrad-LLC/flash-attention's tuned/).
+# torchaudio: CPU-only build pinned deliberately (2.11.0+cpu) -- confirm this
+#   is still the intended choice on the target machine before loosening it;
+#   listed below with its base version as a floor, not a fixed pin.
+# diffusers: pre-release dev build (0.41.0.dev0) -- Cosmos3 pipeline support
+#   may only exist on diffusers main, not a stable PyPI release; install with
+#   `pip install --pre` or `pip install git+https://github.com/huggingface/diffusers.git`
+#   rather than relying on this floor resolving correctly on its own.
+
+absl-py>=2.5.0
+accelerate>=1.15.0
+addict>=2.4.0
+aiofiles>=25.1.0
+aiohappyeyeballs>=2.7.1
+aiohttp>=3.14.3
+aiohttp_socks>=0.12.0
+aiosignal>=1.4.0
+albucore>=0.0.24
+albumentations>=2.0.8
+alembic>=1.19.1
+annotated-doc>=0.0.5
+annotated-types>=0.8.0
+antlr4-python3-runtime>=4.9.3
+anyio>=4.14.2
+attrs>=26.1.0
+av>=18.1.0
+bitsandbytes>=0.50.2
+blake3>=1.0.9
+boltons>=26.1.0
+cachebox>=5.2.3
+certifi>=2026.7.22
+cffi>=2.1.1
+chardet>=7.6.0
+charset-normalizer>=3.5.1
+click>=8.4.2
+colorlog>=6.12.0
+comfy-aimdo>=0.4.15
+comfy-angle>=0.1.1
+comfy-kitchen>=0.2.31
+comfyui-embedded-docs>=0.5.10
+comfyui-workflow-templates-core>=0.3.320
+comfyui-workflow-templates-json>=0.1.55
+comfyui-workflow-templates-media-api>=0.3.84
+comfyui-workflow-templates-media-assets-01>=0.1.33
+comfyui-workflow-templates-media-image>=0.3.160
+comfyui-workflow-templates-media-other>=0.3.229
+comfyui-workflow-templates-media-video>=0.3.101
+comfyui_frontend_package>=1.49.6
+comfyui_workflow_templates>=0.11.46
+contourpy>=1.3.3
+cryptography>=50.0.1
+cuda-bindings>=13.3.1
+cuda-pathfinder>=1.6.1
+cuda-toolkit>=13.0.3.0
+cycler>=0.12.1
+deepdiff>=9.1.0
+diffusers>=0.41.0.dev0  # pre-release; needs --pre or an explicit git install, not on stable PyPI
+distro>=1.9.0
+easydict>=1.13
+einops>=0.8.2
+filelock>=3.32.3
+flatbuffers>=25.12.19
+fonttools>=4.63.0
+frozenlist>=1.8.0
+fsspec>=2026.7.0
+ftfy>=6.3.1
+fvcore>=0.1.5.post20221221
+gitdb>=4.0.12
+GitPython>=3.1.62
+greenlet>=3.5.5
+h11>=0.16.0
+h2>=4.4.1
+hf-xet>=1.6.0
+hpack>=4.2.0
+httpcore2>=2.12.0
+httpcore>=1.0.9
+httpx2>=2.12.0
+httpx>=0.28.1
+huggingface_hub>=1.31.0
+hyperframe>=6.1.0
+idna>=3.19
+imageio-ffmpeg>=0.6.0
+ImageIO>=2.37.4
+imath>=0.0.2
+importlib_metadata>=9.0.1
+iniconfig>=2.3.0
+iopath>=0.1.10
+jetson-stats>=7.2.1
+Jinja2>=3.1.6
+joblib>=1.5.3
+jsonschema-specifications>=2025.9.1
+jsonschema>=4.26.0
+kiwisolver>=1.5.1
+kornia>=0.8.3
+kornia_rs>=0.1.14
+lazy-loader>=0.5
+lxml>=6.1.2
+Mako>=1.4.1
+manifold3d>=3.5.2
+mapbox_earcut>=2.0.0
+markdown-it-py>=4.2.0
+MarkupSafe>=3.0.3
+matplotlib>=3.11.1
+matrix-nio>=0.26.0
+mcp-types>=2.1.1
+mcp>=2.1.1
+mdurl>=0.1.2
+mediapipe>=1.0.1
+mpmath>=1.3.0
+multidict>=6.7.1
+narwhals>=2.25.0
+networkx>=3.6.1
+ninja>=1.13.0
+numpy>=2.5.2
+nvidia-cublas>=13.1.1.3
+nvidia-cuda-cupti>=13.0.85
+nvidia-cuda-nvrtc>=13.0.88
+nvidia-cuda-runtime>=13.0.96
+nvidia-cudnn-cu13>=9.20.0.48
+nvidia-cufft>=12.0.0.61
+nvidia-cufile>=1.15.1.6
+nvidia-curand>=10.4.0.35
+nvidia-cusolver>=12.0.4.66
+nvidia-cusparse>=12.6.3.3
+nvidia-cusparselt-cu13>=0.8.1
+nvidia-ml-py>=13.610.43
+nvidia-nccl-cu13>=2.29.7
+nvidia-nvjitlink>=13.3.33
+nvidia-nvshmem-cu13>=3.4.5
+nvidia-nvtx>=13.0.85
+omegaconf>=2.3.1
+opencv-contrib-python>=5.0.0.93
+opencv-python-headless>=5.0.0.93
+opencv-python>=5.0.0.93
+OpenEXR>=3.4.15
+opentelemetry-api>=1.44.0
+orderly-set>=5.5.0
+packaging>=26.3
+piexif>=1.1.3
+pillow>=12.3.0
+pip>=26.2.1
+platformdirs>=4.11.5
+playwright>=1.62.0
+pluggy>=1.6.0
+portalocker>=4.3.0
+propcache>=0.5.2
+psutil>=7.2.2
+py-cpuinfo>=9.0.0
+py-spy>=0.4.2
+pycollada>=0.9.3
+pycparser>=3.0
+pycryptodome>=3.23.0
+pydantic-settings>=2.15.0
+pydantic>=2.13.4
+pydantic_core>=2.46.4
+pyee>=13.0.1
+PyGithub>=2.10.0
+Pygments>=2.21.0
+PyJWT>=2.13.0
+PyNaCl>=1.6.2
+PyOpenGL>=3.1.10
+pyparsing>=3.3.2
+pytest-aiohttp>=1.1.1
+pytest-asyncio>=1.4.0
+pytest>=9.1.1
+python-dateutil>=2.9.0.post0
+python-dotenv>=1.2.3
+python-multipart>=0.0.32
+python-socks>=3.1.1
+PyYAML>=6.0.3
+referencing>=0.37.0
+regex>=2026.7.19
+requests>=2.34.2
+rich>=15.0.0
+rpds-py>=2026.6.3
+rtree>=1.4.1
+safetensors>=0.8.0
+scikit-image>=0.26.0
+scikit-learn>=1.9.0
+scipy>=1.18.1
+sentencepiece>=0.2.2
+setuptools>=84.0.0
+shapely>=2.1.2
+shellingham>=1.5.4
+simpleeval>=1.0.7
+simsimd>=6.5.16
+six>=1.17.0
+smbus2>=0.6.1
+smmap>=5.0.3
+sounddevice>=0.5.6
+spandrel>=0.4.2
+SQLAlchemy>=2.0.52
+sse-starlette>=3.4.8
+starlette>=1.6.0
+stringzilla>=5.1.2
+svg.path>=7.1
+sympy>=1.14.0
+tabulate>=0.10.0
+termcolor>=3.3.0
+threadpoolctl>=3.6.0
+tifffile>=2026.8.23
+timm>=1.0.29
+tokenizers>=0.23.2
+toml>=0.10.2
+torchsde>=0.2.6
+torchvision>=0.28.0
+tqdm>=4.70.0
+trampoline>=0.1.2
+transformers>=5.17.0
+trimesh>=5.0.0
+triton>=3.7.1
+truststore>=0.10.4
+typer>=0.27.1
+typing-inspection>=0.4.4
+typing_extensions>=4.16.0
+unpaddedbase64>=2.1.0
+urllib3>=2.7.0
+uv>=0.12.15
+uvicorn>=0.52.4
+vhacdx>=0.0.10
+wcwidth>=0.8.3
+websocket-client>=1.9.0
+xxhash>=4.0.1
+yacs>=0.1.8
+yapf>=0.43.0
+yarl>=1.24.5
+zipp>=4.1.0
