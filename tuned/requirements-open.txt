@@ -10,9 +10,15 @@
 # explicitly, since ">=" against a local-tagged or dev version does not mean
 # what it would for a normal release -- see notes:
 
-# torch: GB10-tuned custom build (2.14.0.dev20260707+gitc36325c5ba.gb10.cu133)
-#   -- do NOT pip-install; build via the tuned-builds pipeline (tuned-common.sh
-#   / the pytorch repo's own tuned/ build scripts).
+# Pre-install system package before any pip install below (a fresh host
+# won't have it, and the tuned torch wheel's compiled .so fails to import
+# without it -- hit on node-gb10-2 2026-09-16):
+#   sudo apt install -y libopenblas0-pthread
+#
+# torch: GB10-tuned custom build -- do NOT pip-install from PyPI; install the
+#   latest published wheel from https://github.com/zbrad/pytorch/releases
+#   (or build via the tuned-builds pipeline: tuned-common.sh / the pytorch
+#   repo's own tuned/ build scripts).
 # flash_attn: GB10-tuned custom build (2.8.4+gb10.cu133) -- do NOT pip-install;
 #   build via the tuned-builds pipeline (ZBrad-LLC/flash-attention's tuned/).
 # torchaudio: CPU-only build pinned deliberately (2.11.0+cpu) -- confirm this
