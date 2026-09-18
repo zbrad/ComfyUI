@@ -216,9 +216,12 @@ compile perf, out of scope for this investigation).
 6. ~~Re-test against Super with this combined config~~ — done, see above.
    ~13.7% faster steady-state, confirmed transfers from Nano.
 7. ~~Wire this into ComfyUI itself (custom node/pipeline wrapper)~~ — done
-   2026-09-17/18. `custom_nodes/scg-Cosmos3-gb10` (fork of
-   `SanDiegoDude/scg-Cosmos3`, renamed from `scg-Cosmos3` to avoid a
-   folder/name collision with a plain upstream checkout) applies this
+   2026-09-17/18. `custom_nodes/scg-Cosmos3-tuned` (fork of
+   `SanDiegoDude/scg-Cosmos3`, renamed from `scg-Cosmos3` -> `scg-Cosmos3-gb10`
+   -> `scg-Cosmos3-tuned` -- the folder/name collision with a plain
+   upstream checkout was the first rename's reason; the second dropped the
+   GB10-specific suffix ahead of planned rtx40/rtx50 profiles, matching the
+   rest of the fleet's naming convention) applies this
    combined config as a `tuned/devices/gb10.conf` runtime profile
    (`cosmos3_wrapper/tuned.py`), auto-detected by GPU name and exposed as
    `attention_backend`/`torch_compile` loader-node inputs (default `auto`
