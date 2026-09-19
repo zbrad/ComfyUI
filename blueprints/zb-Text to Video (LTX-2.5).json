@@ -145,7 +145,7 @@
         "ltx-2.5-latent-spatial-upscaler-x2-bf16-1.0.safetensors",
         "gemma4_e2b_it_int8_convrot.safetensors"
       ],
-      "title": "zb-Text to Video (LTX-2.5)"
+      "title": "ZB Text to Video (LTX-2.5)"
     }
   ],
   "links": [],
@@ -162,7 +162,7 @@
         },
         "revision": 0,
         "config": {},
-        "name": "zb-Text to Video (LTX-2.5)",
+        "name": "ZB Text to Video (LTX-2.5)",
         "inputNode": {
           "id": -10,
           "bounding": [
