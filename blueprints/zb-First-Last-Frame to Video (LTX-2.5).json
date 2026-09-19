@@ -138,7 +138,7 @@
         "gemma4-12b-with-proj-ltx-2.5-comfy-int8-convrot.safetensors",
         "gemma4_e2b_it_int8_convrot.safetensors"
       ],
-      "title": "First-Last-Frame to Video (LTX-2.5)"
+      "title": "zb-First-Last-Frame to Video (LTX-2.5)"
     }
   ],
   "links": [],
@@ -155,7 +155,7 @@
         },
         "revision": 0,
         "config": {},
-        "name": "First-Last-Frame to Video (LTX-2.5)",
+        "name": "zb-First-Last-Frame to Video (LTX-2.5)",
         "inputNode": {
           "id": -10,
           "bounding": [

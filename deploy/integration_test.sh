@@ -20,7 +20,7 @@
 # constraint): `.venv/bin/pip install -r
 # ../comfyui-test-integrations/requirements.txt`.
 #
-# Defaults to the plain Text to Video (LTX-2.5) blueprint -- no image
+# Defaults to the plain zb-Text to Video (LTX-2.5) blueprint -- no image
 # input to wire up, fastest of the three LTX-2.5 blueprints, and
 # representative of "does the actual generation pipeline still work" for
 # a deploy gate. Override WORKFLOW_PATH to point at a different one (an
@@ -33,7 +33,7 @@ set -euo pipefail
 
 DEV_REPO=/home/zbrad/gh/ComfyUI
 HARNESS_REPO="${HARNESS_REPO:-$DEV_REPO/../comfyui-test-integrations}"
-WORKFLOW_PATH="${WORKFLOW_PATH:-$DEV_REPO/blueprints/Text to Video (LTX-2.5).json}"
+WORKFLOW_PATH="${WORKFLOW_PATH:-$DEV_REPO/blueprints/zb-Text to Video (LTX-2.5).json}"
 INTEGRATION_TEST_PROMPT="${INTEGRATION_TEST_PROMPT:-A single red apple resting on a plain wooden table, soft natural light, static camera, three seconds.}"
 INTEGRATION_TEST_TIMEOUT="${INTEGRATION_TEST_TIMEOUT:-300}"
 
