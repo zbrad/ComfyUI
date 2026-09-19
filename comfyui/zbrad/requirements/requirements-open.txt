@@ -3,7 +3,7 @@
 # fresh `pip install -r` on another machine picks up compatible newer
 # releases rather than reproducing this exact frozen state byte-for-byte.
 # Generated from `pip list --format=freeze`; NOT a replacement for the
-# app-level requirements.txt / requirements-no-torch.txt at repo root.
+# app-level requirements.txt at repo root / requirements-no-torch.txt alongside this file.
 #
 # Packages below with a local build tag (+gb10.cu133, +gitXXXX) or a
 # .dev/pre-release version are excluded from the open floors or called out

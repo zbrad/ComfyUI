@@ -1,0 +1,13 @@
+# Custom nodes cloned into <checkout>/custom_nodes/ by install.sh.
+# dir | git url | branch      ("-" for url = local-only, nothing to clone)
+# install.sh only clones what is missing; it never switches an existing clone.
+comfyui-manager|https://github.com/Comfy-Org/ComfyUI-Manager.git|main
+comfyui-controlnet-aux|https://github.com/Fannovel16/comfyui_controlnet_aux.git|main
+comfyui-video-depth-anything|https://github.com/yuvraj108c/ComfyUI-Video-Depth-Anything.git|main
+comfyui-test-framework|https://github.com/Comfy-Org/ComfyUI-test-framework.git|main
+jolly-cosmos3-comfyuinodes|https://github.com/JOLLYKRONK/jolly-cosmos3-comfyuinodes|main
+comfyui-crystools|https://github.com/zbrad/ComfyUI-Crystools.git|vram-query-fallback
+comfyui-ltxvideo|https://github.com/zbrad/ComfyUI-LTXVideo.git|master
+scg-Cosmos3-tuned|https://github.com/zbrad/scg-Cosmos3-tuned.git|main
+# Exists only on the host it was written on (no git remote yet).
+comfyui-first-run-setup|-|-

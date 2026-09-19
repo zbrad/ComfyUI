@@ -1,7 +1,10 @@
 # Release-based deployment for comfyui.service
 
+Scripts live in `comfyui/zbrad/scripts/`; see `comfyui/zbrad/README.md` for
+setup (`install.sh`) and the settings file.
+
 `comfyui.service` (a systemd user unit) used to run directly out of the dev
-checkout at `~/gh/ComfyUI` — restarting it just re-executed whatever was on
+checkout — restarting it just re-executed whatever was on
 disk at that moment, with no way to roll back except editing that same live
 tree in place.
 
@@ -9,13 +12,13 @@ This directory holds the scripts for a git-worktree-based release model
 instead:
 
 ```
-~/gh/ComfyUI                                    <- dev checkout (edit/commit here as usual)
-~/gh/ComfyUI-releases/
+<dev checkout>                                   <- edit/commit here as usual
+<parent of dev checkout>/ComfyUI-releases/
     releases/<short-sha>-<UTC timestamp>/        <- one git worktree per release, pinned to a commit
     current -> releases/<active release>          <- what the service actually runs
 ```
 
-`comfyui.service` points at `~/gh/ComfyUI-releases/current` (`WorkingDirectory`
+`comfyui.service` points at `<releases>/current` (`WorkingDirectory`
 and `ExecStart` both). A release/rollback is just: repoint `current`, restart
 the service.
 
@@ -56,8 +59,8 @@ the shared `.venv` separately.
   timestamp, marking the currently active one.
 - `test-and-deploy.sh <commit-ish>` — the actual "build passed testing, now
   deploy" gate. Cuts a release, boots it as a **separate, local-only
-  instance on `TEST_PORT`** (`127.0.0.1:8189` by default — distinct from
-  the real service's `100.112.80.10:8188`, so testing never touches or
+  instance on `COMFY_TEST_PORT`** (`127.0.0.1:8189` by default — distinct from
+  the real service's `$COMFY_LISTEN_ADDR:$COMFY_PORT`, so testing never touches or
   contends with the live service), runs `tests-unit/` against it, and only
   then calls `activate-release.sh` on the real port. The test instance is
   always torn down before production is touched — on failure it's killed
@@ -73,8 +76,8 @@ the shared `.venv` separately.
   real workflow through
   [zbrad/comfyui-test-integrations](https://github.com/zbrad/comfyui-test-integrations)'
   `test_workflow_headless.py` against the isolated test instance before
-  every deploy: `INTEGRATION_TEST_CMD=deploy/integration_test.sh
-  deploy/test-and-deploy.sh HEAD`. Drives an actual headless browser
+  every deploy: `INTEGRATION_TEST_CMD=comfyui/zbrad/scripts/integration_test.sh
+  comfyui/zbrad/scripts/test-and-deploy.sh HEAD`. Drives an actual headless browser
   (Playwright) so this exercises ComfyUI's real `app.graphToPrompt()`/
   `app.queuePrompt()`, not a hand-rolled reimplementation of that
   conversion — see that repo's `test_workflow_headless.py` docstring for
@@ -97,25 +100,25 @@ the venv's existing torch-pin constraint).
 ## Typical flow
 
 ```
-cd ~/gh/ComfyUI
+cd <dev checkout>
 git commit -am "..."                    # normal dev work on zbrad-local
-INTEGRATION_TEST_CMD=deploy/integration_test.sh deploy/test-and-deploy.sh HEAD
+INTEGRATION_TEST_CMD=comfyui/zbrad/scripts/integration_test.sh comfyui/zbrad/scripts/test-and-deploy.sh HEAD
                                          # tests-unit/ + a real queued workflow on :8189,
                                          # deploys to :8188 only if both pass
 # ... service now running the new release; if it's bad anyway:
-deploy/rollback.sh
+comfyui/zbrad/scripts/rollback.sh
 ```
 
 Lower-level flow without the test gate (e.g. deploying a commit you've
 already validated some other way):
 
 ```
-deploy/cut-release.sh                   # cuts a release at HEAD
-deploy/activate-release.sh <printed-path-or-sha>
-deploy/rollback.sh                      # if it's bad
+comfyui/zbrad/scripts/cut-release.sh                   # cuts a release at HEAD
+comfyui/zbrad/scripts/activate-release.sh <printed-path-or-sha>
+comfyui/zbrad/scripts/rollback.sh                      # if it's bad
 ```
 
 Old release worktrees are not auto-pruned — remove one with
-`git worktree remove <path>` (from `~/gh/ComfyUI`) once you're sure it's no
+`git worktree remove <path>` (from the dev checkout) once you're sure it's no
 longer needed, then `rm -rf` the directory doesn't apply since `worktree
 remove` already deletes it.

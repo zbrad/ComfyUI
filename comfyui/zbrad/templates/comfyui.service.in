@@ -1,0 +1,21 @@
+[Unit]
+Description=ComfyUI
+After=network.target
+Wants=comfyui-resource-watch.service
+
+[Service]
+Type=simple
+WorkingDirectory=@RELEASES_ROOT@/current
+# Defaults are local-only; @SECRETS_FILE@ overrides them (see templates/comfy.example).
+Environment=COMFY_LISTEN_ADDR=127.0.0.1
+Environment=COMFY_PORT=8188
+Environment=COMFY_FRONTEND_ROOT=@FRONTEND_ROOT@
+EnvironmentFile=-@SECRETS_FILE@
+ExecStart=@RELEASES_ROOT@/current/.venv/bin/python main.py --listen ${COMFY_LISTEN_ADDR} --port ${COMFY_PORT} --front-end-root ${COMFY_FRONTEND_ROOT}
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,5 @@
+# Sibling repos cloned next to the ComfyUI checkout by install.sh.
+# dir | git url | branch
+# ComfyUI_frontend's zbrad-local is based on v1.49.6 (see README).
+ComfyUI_frontend|https://github.com/zbrad/ComfyUI_frontend.git|zbrad-local
+comfyui-test-integrations|https://github.com/zbrad/comfyui-test-integrations.git|main

@@ -1,0 +1,12 @@
+# Copy to ~/.secrets/comfy and chmod 600. Plain KEY=value lines only (no
+# "export", no quotes, no trailing comments): systemd's EnvironmentFile= and
+# the deploy scripts' `set -a; . file` both read this same format.
+
+# Address ComfyUI listens on. The default (127.0.0.1) is local-only; set the
+# machine's Tailscale/LAN address to reach it from other hosts.
+COMFY_LISTEN_ADDR=127.0.0.1
+
+# Optional overrides (defaults shown).
+# COMFY_PORT=8188
+# COMFY_TEST_PORT=8189
+# COMFY_FRONTEND_ROOT=<parent of the checkout>/ComfyUI_frontend/dist
