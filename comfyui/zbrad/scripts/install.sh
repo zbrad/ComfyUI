@@ -98,20 +98,19 @@ install_workflows() {
     while IFS= read -r -d '' f; do
         rel="${f#"$src"/}"
         if [ ! -e "$dst/$rel" ]; then
-            run mkdir -p "$(dirname "$dst/$rel")"
-            run cp "$f" "$dst/$rel"
+            if [ "$DRY" -eq 0 ]; then mkdir -p "$(dirname "$dst/$rel")"; cp "$f" "$dst/$rel"; fi
             new=$((new + 1))
         elif cmp -s "$f" "$dst/$rel"; then
             same=$((same + 1))
         elif [ "$FORCE" -eq 1 ]; then
-            run cp "$f" "$dst/$rel"
+            if [ "$DRY" -eq 0 ]; then cp "$f" "$dst/$rel"; fi
             new=$((new + 1))
         else
             say "  differs, skipped (edited locally?): $rel"
             differ=$((differ + 1))
         fi
     done < <(find "$src" -type f -name '*.json' -print0)
-    say "  copied $new, unchanged $same, differing $differ (use --force to overwrite)"
+    say "  new/updated $new, unchanged $same, differing $differ (use --force to overwrite)"
 }
 
 install_pip_conf() {
