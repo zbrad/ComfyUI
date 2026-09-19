@@ -4,8 +4,9 @@
 # run activate-release.sh separately once you're ready to switch to it.
 set -euo pipefail
 
-DEV_REPO=/home/zbrad/gh/ComfyUI
-RELEASES_DIR=/home/zbrad/gh/ComfyUI-releases/releases
+# shellcheck source=lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+RELEASES_DIR="$RELEASES_ROOT/releases"
 # Directories AND the one shared log file below all have the same
 # property: they're gitignored, so `git worktree add` has nothing tracked
 # to check out there. Symlinking them back to DEV_REPO keeps them as one
@@ -43,5 +44,7 @@ for f in "${SHARED_FILES[@]}"; do
     rm -f "${REL:?}/${f}"
     ln -s "${DEV_REPO}/${f}" "${REL}/${f}"
 done
+
+zb_link_blueprints "$REL"
 
 echo "Release ready: $REL"

@@ -18,47 +18,6 @@ venv*/
 !/web/extensions/core/
 /tests-ui/data/object_info.json
 /user/
-!/user/
-/user/*
-!/user/default/
-/user/default/*
-!/user/default/workflows/
-/user/default/workflows/*
-!/user/default/workflows/LTX-2.5 Text to Video (Dev).json
-!/user/default/workflows/LTX-2.5 Image to Video (Dev).json
-!/user/default/workflows/LTX-2.5 First Last Frame to Video (Dev).json
-!/user/default/workflows/LTX-2.5 Text to Video (Distilled fp8).json
-!/user/default/workflows/LTX-2.5 Image to Video (Distilled fp8).json
-!/user/default/workflows/LTX-2.5 First Last Frame to Video (Distilled fp8).json
-!/user/default/workflows/examples/
-/user/default/workflows/examples/*
-!/user/default/workflows/examples/ltxv-2.5-fp8/
-/user/default/workflows/examples/ltxv-2.5-fp8/*
-!/user/default/workflows/examples/ltxv-2.5-fp8/video_ltx2_5_t2v.json
-!/user/default/workflows/examples/ltxv-2.5-fp8/video_ltx2_5_i2v.json
-!/user/default/workflows/examples/ltxv-2.5-fp8/video_ltx2_5_flf2v.json
-!/user/default/workflows/examples/ltxv-2.5-fp8/video_ltx2_5_ic_lora.json
-!/user/default/workflows/examples/ltxv-2.5-fp8/video_ltx2_5_ia2v.json
-!/user/default/workflows/examples/ltxv-2.5-fp8/video_ltx2_5_style_transition.json
-!/user/default/workflows/examples/ltxv-2.5-fp8/video_ltx2_5_id_lora.json
-!/user/default/workflows/examples/ltxv-2.5-fp8/video_ltx2_5_ic_lora_ingredients.json
-!/user/default/workflows/examples/ltxv-2.5-fp8/video_ltx2_5_pixel_spatial_upscaler.json
-!/user/default/workflows/examples/ltxv-2.5-bf16/
-/user/default/workflows/examples/ltxv-2.5-bf16/*
-!/user/default/workflows/examples/ltxv-2.5-bf16/video_ltx2_5_t2v.json
-!/user/default/workflows/examples/ltxv-2.5-bf16/video_ltx2_5_i2v.json
-!/user/default/workflows/examples/ltxv-2.5-bf16/video_ltx2_5_flf2v.json
-!/user/default/workflows/examples/ltxv-2.5-bf16/video_ltx2_5_ic_lora.json
-!/user/default/workflows/examples/ltxv-2.5-bf16/video_ltx2_5_ia2v.json
-!/user/default/workflows/examples/ltxv-2.5-bf16/video_ltx2_5_style_transition.json
-!/user/default/workflows/examples/ltxv-2.5-bf16/video_ltx2_5_id_lora.json
-!/user/default/workflows/examples/ltxv-2.5-bf16/video_ltx2_5_ic_lora_ingredients.json
-!/user/default/workflows/examples/ltxv-2.5-bf16/video_ltx2_5_pixel_spatial_upscaler.json
-!/user/default/workflows/examples/ltxv-2.5-dev/
-/user/default/workflows/examples/ltxv-2.5-dev/*
-!/user/default/workflows/examples/ltxv-2.5-dev/video_ltx2_5_t2v.json
-!/user/default/workflows/examples/ltxv-2.5-dev/video_ltx2_5_i2v.json
-!/user/default/workflows/examples/ltxv-2.5-dev/video_ltx2_5_flf2v.json
 *.log
 web_custom_versions/
 .DS_Store

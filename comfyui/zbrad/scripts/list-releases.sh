@@ -3,8 +3,10 @@
 # marking the currently active one with '*'.
 set -euo pipefail
 
-RELEASES_DIR=/home/zbrad/gh/ComfyUI-releases/releases
-CURRENT_LINK=/home/zbrad/gh/ComfyUI-releases/current
+# shellcheck source=lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+RELEASES_DIR="$RELEASES_ROOT/releases"
+CURRENT_LINK="$RELEASES_ROOT/current"
 
 CURRENT_TARGET=""
 if [ -L "$CURRENT_LINK" ]; then

@@ -6,9 +6,10 @@
 # any failure.
 set -euo pipefail
 
-DEV_REPO=/home/zbrad/gh/ComfyUI
-SERVICE_PORT=8188                  # comfyui.service's real port -- keep in sync with the unit file
-TEST_PORT="${TEST_PORT:-8189}"     # isolated port for the pre-deploy test instance
+# shellcheck source=lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+SERVICE_PORT="$COMFY_PORT"         # comfyui.service's real port
+TEST_PORT="$COMFY_TEST_PORT"       # isolated port for the pre-deploy test instance
 TEST_HOST=127.0.0.1                # test instance is local-only, unlike the real service's listen address
 
 # Optional: a command to run additional live/integration tests against the
@@ -18,7 +19,7 @@ INTEGRATION_TEST_CMD="${INTEGRATION_TEST_CMD:-}"
 
 if [ $# -ne 1 ]; then
     echo "usage: $0 <commit-ish>" >&2
-    echo "  env: TEST_PORT (default 8189), INTEGRATION_TEST_CMD (optional)" >&2
+    echo "  env: COMFY_TEST_PORT (default 8189), INTEGRATION_TEST_CMD (optional)" >&2
     exit 1
 fi
 
@@ -30,7 +31,7 @@ if [ "$TEST_PORT" = "$SERVICE_PORT" ]; then
 fi
 
 echo "== Cutting release for testing (${COMMITISH}) ==" >&2
-REL=$("$DEV_REPO/deploy/cut-release.sh" "$COMMITISH" | grep -oP 'Release ready: \K.*')
+REL=$("$ZB_SCRIPTS_DIR/cut-release.sh" "$COMMITISH" | grep -oP 'Release ready: \K.*')
 echo "Release under test: $REL" >&2
 
 TEST_PID=""
@@ -86,4 +87,4 @@ trap - EXIT
 cleanup
 sleep 2  # let the GPU/CUDA context from the test instance fully release before the real restart
 
-"$DEV_REPO/deploy/activate-release.sh" "$REL"
+"$ZB_SCRIPTS_DIR/activate-release.sh" "$REL"

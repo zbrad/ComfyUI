@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Meant to be pointed at by test-and-deploy.sh's INTEGRATION_TEST_CMD, e.g.:
-#   INTEGRATION_TEST_CMD=deploy/integration_test.sh deploy/test-and-deploy.sh HEAD
+#   INTEGRATION_TEST_CMD=comfyui/zbrad/scripts/integration_test.sh comfyui/zbrad/scripts/test-and-deploy.sh HEAD
 #
 # Queues a real workflow against the isolated test instance
 # test-and-deploy.sh already booted (COMFYUI_TEST_URL, set by that
@@ -31,9 +31,10 @@
 # stays to the one blueprint with no such setup needed).
 set -euo pipefail
 
-DEV_REPO=/home/zbrad/gh/ComfyUI
+# shellcheck source=lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 HARNESS_REPO="${HARNESS_REPO:-$DEV_REPO/../comfyui-test-integrations}"
-WORKFLOW_PATH="${WORKFLOW_PATH:-$DEV_REPO/blueprints/ZB Text to Video (LTX-2.5).json}"
+WORKFLOW_PATH="${WORKFLOW_PATH:-$DEV_REPO/comfyui/zbrad/examples/blueprints/ZB Text to Video (LTX-2.5).json}"
 INTEGRATION_TEST_PROMPT="${INTEGRATION_TEST_PROMPT:-A single red apple resting on a plain wooden table, soft natural light, static camera, three seconds.}"
 INTEGRATION_TEST_TIMEOUT="${INTEGRATION_TEST_TIMEOUT:-300}"
 

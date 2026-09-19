@@ -4,11 +4,13 @@
 # previously-active release in .previous so rollback.sh can swap back.
 set -euo pipefail
 
-RELEASES_DIR=/home/zbrad/gh/ComfyUI-releases/releases
-CURRENT_LINK=/home/zbrad/gh/ComfyUI-releases/current
-PREVIOUS_FILE=/home/zbrad/gh/ComfyUI-releases/.previous
+# shellcheck source=lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+RELEASES_DIR="$RELEASES_ROOT/releases"
+CURRENT_LINK="$RELEASES_ROOT/current"
+PREVIOUS_FILE="$RELEASES_ROOT/.previous"
 SERVICE=comfyui.service
-PORT=8188  # keep in sync with ~/.config/systemd/user/comfyui.service
+PORT="$COMFY_PORT"
 
 if [ $# -ne 1 ]; then
     echo "usage: $0 <release-dir-or-short-sha>" >&2

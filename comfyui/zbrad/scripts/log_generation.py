@@ -30,8 +30,10 @@ import urllib.request
 from pathlib import Path
 from typing import Optional
 
-LOG_PATH = Path(__file__).parent / "generation-log.jsonl"
-OUTPUT_DIR = Path(__file__).parent / "output"
+# comfyui/zbrad/scripts/ -> repo root, where ComfyUI's output/ and the shared log live
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+LOG_PATH = _REPO_ROOT / "generation-log.jsonl"
+OUTPUT_DIR = _REPO_ROOT / "output"
 
 
 class GenerationLogger:

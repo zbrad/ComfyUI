@@ -6,8 +6,10 @@
 # between the last two releases rather than consuming a single undo.
 set -euo pipefail
 
-PREVIOUS_FILE=/home/zbrad/gh/ComfyUI-releases/.previous
-ACTIVATE_SCRIPT=/home/zbrad/gh/ComfyUI/deploy/activate-release.sh
+# shellcheck source=lib.sh
+source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
+PREVIOUS_FILE="$RELEASES_ROOT/.previous"
+ACTIVATE_SCRIPT="$ZB_SCRIPTS_DIR/activate-release.sh"
 
 if [ ! -f "$PREVIOUS_FILE" ]; then
     echo "error: no recorded previous release to roll back to" \
