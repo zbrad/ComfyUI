@@ -9,5 +9,3 @@ jolly-cosmos3-comfyuinodes|https://github.com/JOLLYKRONK/jolly-cosmos3-comfyuino
 comfyui-crystools|https://github.com/zbrad/ComfyUI-Crystools.git|vram-query-fallback
 comfyui-ltxvideo|https://github.com/zbrad/ComfyUI-LTXVideo.git|master
 scg-Cosmos3-tuned|https://github.com/zbrad/scg-Cosmos3-tuned.git|main
-# Exists only on the host it was written on (no git remote yet).
-comfyui-first-run-setup|-|-

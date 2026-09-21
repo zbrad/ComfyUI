@@ -79,6 +79,28 @@ install_repos() {
     sync_repos "$ZB_DIR/config/custom-nodes.txt" "$DEV_REPO/custom_nodes"
 }
 
+# Nodes kept in this repo (comfyui/zbrad/custom_nodes/) rather than in their own
+# repo are linked into custom_nodes/ with relative links. custom_nodes/ is
+# ignored by git, so nothing needs excluding. An existing entry is left alone.
+install_vendored_nodes() {
+    local src="$DEV_REPO/comfyui/zbrad/custom_nodes" d name dest
+    say "== Vendored custom nodes (linked into $DEV_REPO/custom_nodes) =="
+    for d in "$src"/*/; do
+        [ -d "$d" ] || continue
+        name="$(basename "$d")"
+        dest="$DEV_REPO/custom_nodes/$name"
+        if [ -L "$dest" ] && [ "$(readlink -f "$dest")" = "$(readlink -f "$d")" ]; then
+            say "  $name: linked"
+        elif [ -e "$dest" ] || [ -L "$dest" ]; then
+            say "  $name: exists and is not this link (left alone)"
+        else
+            say "  $name: linking"
+            run mkdir -p "$DEV_REPO/custom_nodes"
+            run ln -s "../comfyui/zbrad/custom_nodes/$name" "$dest"
+        fi
+    done
+}
+
 install_blueprints() {
     say "== Blueprints (symlinked into $DEV_REPO/blueprints) =="
     if [ "$DRY" -eq 1 ]; then
@@ -177,6 +199,7 @@ install_units() {
 
 check_secrets
 install_repos
+install_vendored_nodes
 install_blueprints
 install_workflows
 install_pip_conf

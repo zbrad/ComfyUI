@@ -9,6 +9,7 @@ tree. Run `scripts/install.sh` to wire it into a checkout.
 |---|---|
 | `scripts/` | `install.sh`, release tooling (`cut-release.sh`, `activate-release.sh`, `rollback.sh`, `list-releases.sh`, `test-and-deploy.sh`, `integration_test.sh`), `log_generation.py`, `resource_watcher.py`, `quantize_checkpoint_fp8.py`, and the vendored `tuned-common.sh` / `sync-common.sh` |
 | `templates/` | systemd user unit templates and `comfy.example` (the settings file) |
+| `custom_nodes/` | nodes that live in this repo instead of their own (`comfyui-first-run-setup`); `install.sh` links them into `custom_nodes/` |
 | `config/` | `custom-nodes.txt` and `repos.txt`: what `install.sh` clones |
 | `examples/` | `blueprints/` (the `ZB ...` LTX-2.5 blueprints) and `workflows/` (LTX-2.5 workflow templates) |
 | `docs/` | `deploy.md` (release model), `cosmos3_nf4_perf_plan.md` |
@@ -68,5 +69,6 @@ by the scripts. Everything else is derived from where the checkout lives.
   to find the script. `comfyui.service` itself is unaffected.
 - **`ComfyUI_frontend`'s `zbrad-local` branch** is based on v1.49.6; upstream now
   pins a newer frontend, so rebase it before serving it with `--front-end-root`.
-- **`comfyui-first-run-setup`** exists only on the machine it was written on and
-  is listed in `custom-nodes.txt` as local-only.
+- **`comfyui-first-run-setup`** is kept in `custom_nodes/` here and linked in by
+  `install.sh`. It swaps ComfyUI's stock default graph for the LTX-2.5 Text to
+  Video workflow, only on a browser's first visit and never over real work.
