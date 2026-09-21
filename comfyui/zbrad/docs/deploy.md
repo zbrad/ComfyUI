@@ -103,11 +103,13 @@ area, edit `base_path` in that file; it is yours after the first write.
   `.venv`, plus a downloaded Chromium (already there as of this writing;
   `.venv/bin/python3 -m playwright install chromium` if not).
 
-`test-and-deploy.sh` needs `tests-unit/requirements.txt` (pytest etc.)
-installed in the shared `.venv` — it's a separate, torch-free dependency
-set from the app's own requirements, so it's not there by default:
-`.venv/bin/pip install -r tests-unit/requirements.txt` (one-time, respects
-the venv's existing torch-pin constraint).
+`test-and-deploy.sh` needs the test packages (pytest and the rest) in the
+shared `.venv`. They are a separate, torch-free set that is not there by
+default, pinned in `requirements/test.txt`:
+`.venv/bin/python -m pip install --no-deps -r comfyui/zbrad/requirements/test.txt`
+(one-time; `--no-deps` keeps the tuned torch untouched). The custom nodes' and
+the resource watcher's own packages are pinned in `requirements/custom-nodes.txt`
+and installed the same way.
 
 ## Typical flow
 

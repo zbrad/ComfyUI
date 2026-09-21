@@ -13,7 +13,7 @@ tree. Run `scripts/install.sh` to wire it into a checkout.
 | `config/` | `custom-nodes.txt` and `repos.txt`: what `install.sh` clones |
 | `examples/` | `blueprints/` (the `ZB ...` LTX-2.5 blueprints) and `workflows/` (LTX-2.5 workflow templates) |
 | `docs/` | `deploy.md` (release model), `cosmos3_nf4_perf_plan.md` |
-| `requirements/` | `requirements-no-torch.txt`, `requirements-open.txt` |
+| `requirements/` | `requirements-no-torch.txt`, `requirements-open.txt`, `custom-nodes.txt` (pinned packages for the custom nodes and the resource watcher), `test.txt` (pinned test-only packages) |
 
 ## Install
 
