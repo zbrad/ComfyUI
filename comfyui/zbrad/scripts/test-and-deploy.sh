@@ -70,7 +70,8 @@ fi
 echo "Test instance up (pid $TEST_PID)." >&2
 
 echo "== Running tests-unit/ ==" >&2
-if ! "$REL/.venv/bin/python" -m pytest "$REL/tests-unit" -q; then
+# CPU only, like upstream CI: with a GPU visible, test_db_init_locking's `import main` breaks test_seedvr2_dtype.
+if ! CUDA_VISIBLE_DEVICES="" "$REL/.venv/bin/python" -m pytest "$REL/tests-unit" -q; then
     echo "Unit tests FAILED -- not deploying. Release kept at $REL for inspection." >&2
     exit 1
 fi
