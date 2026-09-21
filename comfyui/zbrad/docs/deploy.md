@@ -41,6 +41,18 @@ rolling back to an old release commit does not roll back Python
 dependencies; if a release needs a different dependency set, rebuild/adjust
 the shared `.venv` separately.
 
+## Model folders (`extra_model_paths.yaml`)
+
+`comfyui.service` and `test-and-deploy.sh` both start ComfyUI with
+`--extra-model-paths-config $COMFY_EXTRA_MODEL_PATHS` (default
+`~/.config/comfyui/extra_model_paths.yaml`), so the live service and the test
+instance see the same model folders. ComfyUI opens that file without checking
+it exists and exits if it is missing, and `Restart=on-failure` would then loop,
+so `install.sh` writes it from `templates/extra_model_paths.yaml.in` when it is
+absent, with `base_path` set to the checkout's own `models/`, and never
+overwrites an existing one. To keep models somewhere else, such as a shared
+area, edit `base_path` in that file; it is yours after the first write.
+
 ## Scripts
 
 - `cut-release.sh <commit-ish>` — create a new release worktree at the

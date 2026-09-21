@@ -25,8 +25,10 @@ comfyui/zbrad/scripts/install.sh
 
 `install.sh` is idempotent. It clones missing sibling repos and custom nodes
 (never switching an existing clone's branch), links the blueprints, copies the
-workflows, and renders the units into `~/.config/systemd/user`. It never
-enables, starts or restarts a service; it prints the restart command instead.
+workflows, writes a default `~/.config/comfyui/extra_model_paths.yaml` if none
+exists (never overwriting one), and renders the units into
+`~/.config/systemd/user`. It never enables, starts or restarts a service; it
+prints the restart command instead.
 
 - **Blueprints are symlinked** into `blueprints/` (ComfyUI only reads that
   folder) and listed in the repo's local `.git/info/exclude`. `cut-release.sh`
@@ -46,6 +48,7 @@ by the scripts. Everything else is derived from where the checkout lives.
 | `COMFY_PORT` | `8188` | service port |
 | `COMFY_TEST_PORT` | `8189` | isolated port for `test-and-deploy.sh` |
 | `COMFY_FRONTEND_ROOT` | `<checkout parent>/ComfyUI_frontend/dist` | `--front-end-root` |
+| `COMFY_EXTRA_MODEL_PATHS` | `~/.config/comfyui/extra_model_paths.yaml` | `--extra-model-paths-config`; absolute path in the settings file |
 
 `COMFY_SECRETS_FILE` overrides the file's location.
 
