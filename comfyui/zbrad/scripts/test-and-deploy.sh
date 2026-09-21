@@ -46,6 +46,7 @@ trap cleanup EXIT
 
 echo "== Starting test instance on ${TEST_HOST}:${TEST_PORT} ==" >&2
 "$REL/.venv/bin/python" "$REL/main.py" --listen "$TEST_HOST" --port "$TEST_PORT" \
+    --extra-model-paths-config "$COMFY_EXTRA_MODEL_PATHS" \
     > "$REL/test-instance.log" 2>&1 &
 TEST_PID=$!
 
