@@ -76,8 +76,8 @@ yacs==0.1.8
 yapf==0.43.0
 
 # comfyui-ltxvideo
-# It also needs colour-science>=0.4.4 and openimageio, which no node has installed
-# yet, so they are not pinned here. Until they are, this node fails to import.
+colour-science==0.4.7
+openimageio==3.1.17.0
 ninja==1.13.0
 timm==1.0.29
 
