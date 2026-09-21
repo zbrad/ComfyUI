@@ -23,6 +23,7 @@ if [ -f "$ZB_SECRETS_FILE" ]; then
 fi
 COMFY_PORT="${COMFY_PORT:-8188}"
 COMFY_TEST_PORT="${COMFY_TEST_PORT:-8189}"
+COMFY_EXTRA_MODEL_PATHS="${COMFY_EXTRA_MODEL_PATHS:-$HOME/.config/comfyui/extra_model_paths.yaml}"
 
 # zb_link_blueprints <checkout-root>
 # ComfyUI only reads blueprints from <root>/blueprints/, so symlink ours

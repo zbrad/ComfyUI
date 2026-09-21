@@ -125,6 +125,23 @@ install_pip_conf() {
     fi
 }
 
+# The units pass this file to ComfyUI, which opens it without checking that it
+# exists and exits, so the service would crash-loop without it. Written once,
+# never overwritten: an existing file (even a dangling link) is the user's.
+install_model_paths() {
+    local out="$COMFY_EXTRA_MODEL_PATHS"
+    say "== Model paths ($out) =="
+    if [ -e "$out" ] || [ -L "$out" ]; then
+        say "  exists, left alone"
+        return
+    fi
+    say "  new, base_path $DEV_REPO/models/"
+    if [ "$DRY" -eq 0 ]; then
+        mkdir -p "$(dirname "$out")"
+        sed -e "s#@MODELS_DIR@#$DEV_REPO/models#g" "$ZB_DIR/templates/extra_model_paths.yaml.in" > "$out"
+    fi
+}
+
 render() {
     sed -e "s#@RELEASES_ROOT@#$RELEASES_ROOT#g" \
         -e "s#@FRONTEND_ROOT@#$(dirname "$DEV_REPO")/ComfyUI_frontend/dist#g" \
@@ -163,5 +180,6 @@ install_repos
 install_blueprints
 install_workflows
 install_pip_conf
+install_model_paths
 install_units
 say "Done."
