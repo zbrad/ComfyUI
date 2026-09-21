@@ -7,7 +7,7 @@ tree. Run `scripts/install.sh` to wire it into a checkout.
 
 | Folder | Contents |
 |---|---|
-| `scripts/` | `install.sh`, release tooling (`cut-release.sh`, `activate-release.sh`, `rollback.sh`, `list-releases.sh`, `test-and-deploy.sh`, `integration_test.sh`), `log_generation.py`, `resource_watcher.py`, `quantize_checkpoint_fp8.py`, and the vendored `tuned-common.sh` / `sync-common.sh` |
+| `scripts/` | `install.sh`, release tooling (`cut-release.sh`, `activate-release.sh`, `rollback.sh`, `list-releases.sh`, `test-and-publish.sh`, `deploy-from-release.sh`, `integration_test.sh`), `log_generation.py`, `resource_watcher.py`, `quantize_checkpoint_fp8.py`, and the vendored `tuned-common.sh` / `sync-common.sh` |
 | `templates/` | systemd user unit templates and `comfy.example` (the settings file) |
 | `custom_nodes/` | nodes that live in this repo instead of their own (`comfyui-first-run-setup`); `install.sh` links them into `custom_nodes/` |
 | `config/` | `custom-nodes.txt` and `repos.txt`: what `install.sh` clones |
@@ -47,7 +47,7 @@ by the scripts. Everything else is derived from where the checkout lives.
 |---|---|---|
 | `COMFY_LISTEN_ADDR` | `127.0.0.1` | address ComfyUI listens on |
 | `COMFY_PORT` | `8188` | service port |
-| `COMFY_TEST_PORT` | `8189` | isolated port for `test-and-deploy.sh` |
+| `COMFY_TEST_PORT` | `8189` | isolated port for `test-and-publish.sh` |
 | `COMFY_FRONTEND_ROOT` | `<checkout parent>/ComfyUI_frontend/dist` | `--front-end-root` |
 | `COMFY_EXTRA_MODEL_PATHS` | `~/.config/comfyui/extra_model_paths.yaml` | `--extra-model-paths-config`; absolute path in the settings file |
 

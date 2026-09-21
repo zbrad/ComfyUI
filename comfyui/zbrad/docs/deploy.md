@@ -43,7 +43,7 @@ the shared `.venv` separately.
 
 ## Model folders (`extra_model_paths.yaml`)
 
-`comfyui.service` and `test-and-deploy.sh` both start ComfyUI with
+`comfyui.service` and `test-and-publish.sh` both start ComfyUI with
 `--extra-model-paths-config $COMFY_EXTRA_MODEL_PATHS` (default
 `~/.config/comfyui/extra_model_paths.yaml`), so the live service and the test
 instance see the same model folders. ComfyUI opens that file without checking
@@ -69,27 +69,34 @@ area, edit `base_path` in that file; it is yours after the first write.
   consuming a single undo.
 - `list-releases.sh` — list all release worktrees with their commit and
   timestamp, marking the currently active one.
-- `test-and-deploy.sh <commit-ish>` — the actual "build passed testing, now
-  deploy" gate. Cuts a release, boots it as a **separate, local-only
-  instance on `COMFY_TEST_PORT`** (`127.0.0.1:8189` by default — distinct from
-  the real service's `$COMFY_LISTEN_ADDR:$COMFY_PORT`, so testing never touches or
-  contends with the live service), runs `tests-unit/` against it, and only
-  then calls `activate-release.sh` on the real port. The test instance is
-  always torn down before production is touched — on failure it's killed
-  and production is left alone with the failed release kept on disk for
-  inspection; on success it's stopped first (freeing GPU/CUDA state) and
-  *then* the real restart happens, so the two are never running against
-  the model-loading GPU at the same time. Set `INTEGRATION_TEST_CMD` to
-  also run a live/workflow-level check against the test instance before
-  it's torn down (invoked with `COMFYUI_TEST_URL` set to its base URL) —
-  not wired in by default, but `integration_test.sh` (below) is a
-  ready-made option.
+- `test-and-publish.sh [--no-push] <commit-ish>` — the "is this commit good
+  enough to release" gate. Cuts a release, boots it as a **separate,
+  local-only instance on `COMFY_TEST_PORT`** (`127.0.0.1:8189` by default —
+  distinct from the real service's `$COMFY_LISTEN_ADDR:$COMFY_PORT`, so
+  testing never touches or contends with the live service), runs
+  `tests-unit/` against it with the GPU hidden (the suite assumes a CPU-only
+  machine, like upstream CI), and only if everything passes publishes the
+  release: an annotated git tag `release/<version>-<sha8>` on the tested
+  commit, pushed to `origin`, whose message records the test counts. It never
+  touches the running service; deploying is a separate step. On failure
+  nothing is tagged and the release is kept on disk for inspection. It stops
+  if the tag already exists. `--no-push` creates the tag locally only. Set
+  `INTEGRATION_TEST_CMD` to also run a live/workflow-level check against the
+  test instance before it's torn down (invoked with `COMFYUI_TEST_URL` set to
+  its base URL) — not wired in by default, but `integration_test.sh` (below)
+  is a ready-made option.
+- `deploy-from-release.sh <release-tag>` — deploy a published release. Fetches
+  the tags, refuses anything that is not an annotated `release/*` tag, cuts a
+  release worktree at that tag's commit (or reuses the one already cut for it),
+  and calls `activate-release.sh`, which restarts the service. It only fetches,
+  so any node with a checkout can run it, including one that does not own the
+  repo. Untagged commits cannot be deployed this way.
 - `integration_test.sh` — point `INTEGRATION_TEST_CMD` at this to queue a
   real workflow through
   [zbrad/comfyui-test-integrations](https://github.com/zbrad/comfyui-test-integrations)'
   `test_workflow_headless.py` against the isolated test instance before
-  every deploy: `INTEGRATION_TEST_CMD=comfyui/zbrad/scripts/integration_test.sh
-  comfyui/zbrad/scripts/test-and-deploy.sh HEAD`. Drives an actual headless browser
+  every publish: `INTEGRATION_TEST_CMD=comfyui/zbrad/scripts/integration_test.sh
+  comfyui/zbrad/scripts/test-and-publish.sh HEAD`. Drives an actual headless browser
   (Playwright) so this exercises ComfyUI's real `app.graphToPrompt()`/
   `app.queuePrompt()`, not a hand-rolled reimplementation of that
   conversion — see that repo's `test_workflow_headless.py` docstring for
@@ -103,7 +110,7 @@ area, edit `base_path` in that file; it is yours after the first write.
   `.venv`, plus a downloaded Chromium (already there as of this writing;
   `.venv/bin/python3 -m playwright install chromium` if not).
 
-`test-and-deploy.sh` needs the test packages (pytest and the rest) in the
+`test-and-publish.sh` needs the test packages (pytest and the rest) in the
 shared `.venv`. They are a separate, torch-free set that is not there by
 default, pinned in `requirements/test.txt`:
 `.venv/bin/python -m pip install --no-deps -r comfyui/zbrad/requirements/test.txt`
@@ -115,16 +122,19 @@ and installed the same way.
 
 ```
 cd <dev checkout>
-git commit -am "..."                    # normal dev work on zbrad-local
-INTEGRATION_TEST_CMD=comfyui/zbrad/scripts/integration_test.sh comfyui/zbrad/scripts/test-and-deploy.sh HEAD
-                                         # tests-unit/ + a real queued workflow on :8189,
-                                         # deploys to :8188 only if both pass
-# ... service now running the new release; if it's bad anyway:
+git commit -am "..."                    # normal dev work
+INTEGRATION_TEST_CMD=comfyui/zbrad/scripts/integration_test.sh comfyui/zbrad/scripts/test-and-publish.sh HEAD
+                                         # tests-unit/ + a real queued workflow on :8189;
+                                         # on pass, tags and pushes release/<version>-<sha8>
+comfyui/zbrad/scripts/deploy-from-release.sh release/<version>-<sha8>
+                                         # on the node that should run it: fetches the tag,
+                                         # cuts (or reuses) the release, restarts the service
+# ... if the new release is bad anyway:
 comfyui/zbrad/scripts/rollback.sh
 ```
 
-Lower-level flow without the test gate (e.g. deploying a commit you've
-already validated some other way):
+The lower-level scripts still work on their own, but they skip the publish
+gate, so a deploy made this way is not tied to a tested tag:
 
 ```
 comfyui/zbrad/scripts/cut-release.sh                   # cuts a release at HEAD

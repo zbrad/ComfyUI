@@ -4,7 +4,7 @@
 #
 #   .venv/bin/python -m pip install --no-deps -r comfyui/zbrad/requirements/test.txt
 #
-# scripts/test-and-deploy.sh needs:
+# scripts/test-and-publish.sh needs:
 #   unit tests (tests-unit/requirements.txt): pytest, pytest-aiohttp, pytest-asyncio.
 #     Its fourth entry, websocket-client, is in custom-nodes.txt because the
 #     resource watcher needs it at runtime too.

@@ -12,6 +12,6 @@ COMFY_LISTEN_ADDR=127.0.0.1
 # COMFY_FRONTEND_ROOT=<parent of the checkout>/ComfyUI_frontend/dist
 
 # Model-folders file passed to ComfyUI as --extra-model-paths-config, by the
-# service and by test-and-deploy.sh. Use an absolute path: systemd does not
+# service and by test-and-publish.sh. Use an absolute path: systemd does not
 # expand "~". install.sh writes a default one at that location if none exists.
 # COMFY_EXTRA_MODEL_PATHS=<home>/.config/comfyui/extra_model_paths.yaml
