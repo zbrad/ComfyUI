@@ -14,7 +14,9 @@ RELEASES_DIR="$RELEASES_ROOT/releases"
 # silently starting its own empty copy (129G models/, and for
 # generation-log.jsonl specifically: a fragmented, no-longer-"ongoing"
 # performance log).
-SHARED_DIRS=(.venv models output input temp user custom_nodes)
+# No .venv here on purpose: the units and scripts name the venv explicitly
+# (COMFY_VENV), so a release does not depend on a symlink resolving.
+SHARED_DIRS=(models output input temp user custom_nodes)
 SHARED_FILES=(generation-log.jsonl)
 
 COMMITISH="${1:-HEAD}"

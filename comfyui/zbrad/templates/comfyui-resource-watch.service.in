@@ -9,7 +9,7 @@ WorkingDirectory=@RELEASES_ROOT@/current
 Environment=COMFY_LISTEN_ADDR=127.0.0.1
 Environment=COMFY_PORT=8188
 EnvironmentFile=-@SECRETS_FILE@
-ExecStart=@RELEASES_ROOT@/current/.venv/bin/python comfyui/zbrad/scripts/resource_watcher.py --server http://${COMFY_LISTEN_ADDR}:${COMFY_PORT} --interval 1.0
+ExecStart=@VENV@/bin/python comfyui/zbrad/scripts/resource_watcher.py --server http://${COMFY_LISTEN_ADDR}:${COMFY_PORT} --interval 1.0
 Restart=on-failure
 RestartSec=5
 StandardOutput=journal

@@ -63,7 +63,7 @@ cleanup() {
 trap cleanup EXIT
 
 echo "== Starting test instance on ${TEST_HOST}:${TEST_PORT} ==" >&2
-"$REL/.venv/bin/python" "$REL/main.py" --listen "$TEST_HOST" --port "$TEST_PORT" \
+"$COMFY_VENV/bin/python" "$REL/main.py" --listen "$TEST_HOST" --port "$TEST_PORT" \
     --extra-model-paths-config "$COMFY_EXTRA_MODEL_PATHS" \
     > "$REL/test-instance.log" 2>&1 &
 TEST_PID=$!
@@ -90,19 +90,19 @@ echo "Test instance up (pid $TEST_PID)." >&2
 echo "== Checking dependencies ==" >&2
 # Catches a venv missing something a custom node needs. That kind of gap does
 # not crash and no test covers it: the node just quietly does less.
-if ! "$REL/.venv/bin/python" "$REL/comfyui/zbrad/scripts/check_deps.py" --repo-root "$REL"; then
+if ! "$COMFY_VENV/bin/python" "$REL/comfyui/zbrad/scripts/check_deps.py" --repo-root "$REL"; then
     echo "Dependency check FAILED -- not publishing. Release kept at $REL for inspection." >&2
     exit 1
 fi
 
 echo "== Running tests-unit/ ==" >&2
 # CPU only, like upstream CI: with a GPU visible, test_db_init_locking's `import main` breaks test_seedvr2_dtype.
-if ! CUDA_VISIBLE_DEVICES="" "$REL/.venv/bin/python" -m pytest "$REL/tests-unit" -q --junitxml="$REL/unit-tests.xml"; then
+if ! CUDA_VISIBLE_DEVICES="" "$COMFY_VENV/bin/python" -m pytest "$REL/tests-unit" -q --junitxml="$REL/unit-tests.xml"; then
     echo "Unit tests FAILED -- not publishing. Release kept at $REL for inspection." >&2
     exit 1
 fi
 # The suite swallows pytest's terminal summary, so the counts come from the JUnit report.
-UNIT_SUMMARY="$("$REL/.venv/bin/python" - "$REL/unit-tests.xml" <<'PY'
+UNIT_SUMMARY="$("$COMFY_VENV/bin/python" - "$REL/unit-tests.xml" <<'PY'
 import sys
 import xml.etree.ElementTree as ET
 root = ET.parse(sys.argv[1]).getroot()

@@ -44,7 +44,7 @@ if [ -z "${COMFYUI_TEST_URL:-}" ]; then
     exit 1
 fi
 
-"$DEV_REPO/.venv/bin/python3" "$HARNESS_REPO/test_workflow_headless.py" \
+"$COMFY_VENV/bin/python3" "$HARNESS_REPO/test_workflow_headless.py" \
     "$WORKFLOW_PATH" \
     --url "$COMFYUI_TEST_URL" \
     --prompt "$INTEGRATION_TEST_PROMPT" \

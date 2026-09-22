@@ -14,3 +14,7 @@ COMFY_LISTEN_ADDR=127.0.0.1
 # service and by test-and-publish.sh. Use an absolute path: systemd does not
 # expand "~". install.sh writes a default one at that location if none exists.
 # COMFY_EXTRA_MODEL_PATHS=<home>/.config/comfyui/extra_model_paths.yaml
+
+# Which venv to run. The tuned torch/flash_attn wheels are built against one
+# CUDA toolkit, so this is effectively the CUDA variant.
+# COMFY_VENV=<checkout>/.venv

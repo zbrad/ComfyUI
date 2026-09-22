@@ -24,6 +24,11 @@ fi
 COMFY_PORT="${COMFY_PORT:-8188}"
 COMFY_TEST_PORT="${COMFY_TEST_PORT:-8189}"
 COMFY_EXTRA_MODEL_PATHS="${COMFY_EXTRA_MODEL_PATHS:-$HOME/.config/comfyui/extra_model_paths.yaml}"
+# Named explicitly rather than reached through a symlink inside each release.
+# The tuned torch and flash_attn wheels are built against one CUDA toolkit, so
+# the venv is effectively the CUDA variant: point this at .venv-cu133 or
+# .venv-cu134 to run a different one.
+COMFY_VENV="${COMFY_VENV:-$DEV_REPO/.venv}"
 
 # zb_link_blueprints <checkout-root>
 # ComfyUI only reads blueprints from <root>/blueprints/, so symlink ours

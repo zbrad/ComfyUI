@@ -146,7 +146,7 @@ install_workflows() {
 }
 
 install_pip_conf() {
-    local venv="$DEV_REPO/.venv"
+    local venv="$COMFY_VENV"
     [ -d "$venv" ] && [ ! -f "$venv/pip.conf" ] && [ -f "$DEV_REPO/constraints-gb10.txt" ] || return 0
     say "== venv pip.conf =="
     if [ "$DRY" -eq 1 ]; then
@@ -176,6 +176,7 @@ install_model_paths() {
 
 render() {
     sed -e "s#@RELEASES_ROOT@#$RELEASES_ROOT#g" \
+        -e "s#@VENV@#$COMFY_VENV#g" \
         -e "s#@SECRETS_FILE@#$ZB_SECRETS_FILE#g" "$1"
 }
 

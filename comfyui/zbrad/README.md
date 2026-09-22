@@ -57,6 +57,7 @@ by the scripts. Everything else is derived from where the checkout lives.
 | `COMFY_PORT` | `8188` | service port |
 | `COMFY_TEST_PORT` | `8189` | isolated port for `test-and-publish.sh` |
 | `COMFY_EXTRA_MODEL_PATHS` | `~/.config/comfyui/extra_model_paths.yaml` | `--extra-model-paths-config`; absolute path in the settings file |
+| `COMFY_VENV` | `<checkout>/.venv` | the venv to run. Named explicitly in the rendered units, not reached through a symlink. The tuned `torch` and `flash_attn` wheels are built against one CUDA toolkit, so this is effectively the CUDA variant: point it at `.venv-cu133` or `.venv-cu134` to run a different one |
 
 `COMFY_SECRETS_FILE` overrides the file's location.
 

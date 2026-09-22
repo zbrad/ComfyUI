@@ -14,7 +14,7 @@ EnvironmentFile=-@SECRETS_FILE@
 # Advisory only: logs whether the units are enabled at boot. The leading "-"
 # means a missing script (an older release, after a rollback) cannot block start.
 ExecStartPre=-@RELEASES_ROOT@/current/comfyui/zbrad/scripts/check_enabled.sh
-ExecStart=@RELEASES_ROOT@/current/.venv/bin/python main.py --listen ${COMFY_LISTEN_ADDR} --port ${COMFY_PORT} --extra-model-paths-config ${COMFY_EXTRA_MODEL_PATHS}
+ExecStart=@VENV@/bin/python main.py --listen ${COMFY_LISTEN_ADDR} --port ${COMFY_PORT} --extra-model-paths-config ${COMFY_EXTRA_MODEL_PATHS}
 Restart=on-failure
 RestartSec=5
 StandardOutput=journal
