@@ -85,6 +85,16 @@ area, edit `base_path` in that file; it is yours after the first write.
   test instance before it's torn down (invoked with `COMFYUI_TEST_URL` set to
   its base URL) — not wired in by default, but `integration_test.sh` (below)
   is a ready-made option.
+- `check_deps.py` — fails when the venv is missing something the installed
+  custom nodes or this repo's pin files declare. Checks each
+  `custom_nodes/*/requirements.txt` with environment markers evaluated, this
+  repo's own pin files, and `pip check`. `test-and-publish.sh` runs it before
+  the unit tests, so a venv with a silently-missing package cannot be
+  published. It exists because one did: `nvidia-ml-py` was left out, so
+  Crystools' GPU monitor reported no GPUs and the resource watcher logged no
+  GPU stats, with nothing crashing and no test failing. Deliberate exceptions
+  (a package that breaks on this hardware, an over-tight upstream pin) live in
+  `_ALLOWED_UNMET` in the script, each with its reason.
 - `deploy-from-release.sh <release-tag>` — deploy a published release. Fetches
   the tags, refuses anything that is not an annotated `release/*` tag, cuts a
   release worktree at that tag's commit (or reuses the one already cut for it),

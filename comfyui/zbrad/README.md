@@ -7,7 +7,7 @@ tree. Run `scripts/install.sh` to wire it into a checkout.
 
 | Folder | Contents |
 |---|---|
-| `scripts/` | `install.sh`, release tooling (`cut-release.sh`, `activate-release.sh`, `rollback.sh`, `list-releases.sh`, `test-and-publish.sh`, `deploy-from-release.sh`, `integration_test.sh`), `log_generation.py`, `resource_watcher.py`, `quantize_checkpoint_fp8.py`, and the vendored `tuned-common.sh` / `sync-common.sh` |
+| `scripts/` | `install.sh`, release tooling (`cut-release.sh`, `activate-release.sh`, `rollback.sh`, `list-releases.sh`, `test-and-publish.sh`, `deploy-from-release.sh`, `integration_test.sh`, `check_deps.py`), `log_generation.py`, `resource_watcher.py`, `quantize_checkpoint_fp8.py`, and the vendored `tuned-common.sh` / `sync-common.sh` |
 | `templates/` | systemd user unit templates and `comfy.example` (the settings file) |
 | `custom_nodes/` | nodes that live in this repo instead of their own (`comfyui-first-run-setup`); `install.sh` links them into `custom_nodes/` |
 | `config/` | `custom-nodes.txt` and `repos.txt`: what `install.sh` clones |
