@@ -29,9 +29,11 @@ printed one per line to stderr.
 from __future__ import annotations
 
 import argparse
+import re
+import shutil
 import subprocess
 import sys
-from importlib.metadata import PackageNotFoundError, version
+from importlib.metadata import PackageNotFoundError, distributions, version
 from pathlib import Path
 from typing import Optional
 
@@ -47,6 +49,16 @@ _PIP_CHECK_ALLOWED = ("torchvision", "has requirement torch==")
 # Requirements deliberately left unsatisfied, as "<node>:<package>" with the
 # reason. Only add an entry that has been checked on the hardware; the point of
 # this script is to catch the ones nobody checked.
+# CUDA-tag mismatches between tuned wheels that are known and accepted for now,
+# as "<package>": "<reason>". Remove the entry once the wheel is rebuilt; the
+# check then enforces agreement again on its own.
+_ALLOWED_CUDA_MISMATCH = {
+    # torch moved to cu134; a matching flash_attn is published but not yet
+    # installed, pending a rebuild after faiss. It runs today (flash_attn_func
+    # matches SDPA on the cu134 torch), so this is latent, not broken.
+    "flash_attn": "cu134 rebuild pending; verified working against cu134 torch",
+}
+
 _ALLOWED_UNMET = {
     # quanto's get_max_cuda_arch() does int(arch.split("_")[1]) over
     # torch.cuda.get_arch_list(); the tuned GB10 build reports "sm_121a", so
@@ -76,6 +88,8 @@ class DependencyChecker:
         """Run every check and return the process exit code."""
         self._check_custom_node_requirements()
         self._check_pinned_requirements()
+        self._check_torch_pin()
+        self._check_tuned_wheel_cuda()
         self._check_pip_check()
 
         if self._problems:
@@ -119,6 +133,92 @@ class DependencyChecker:
                 unmet = self._unmet(requirement)
                 if unmet:
                     self._problems.append(f"{name} pins {requirement}: {unmet}")
+
+    def _check_torch_pin(self) -> None:
+        """Check every torch constraint file agrees with the installed torch.
+
+        The pin exists so pip cannot swap the tuned build for a stock one, so a
+        pin naming a different build is worse than none: it would actively pull
+        the wrong wheel in. Both the file pip is configured to use and any
+        constraints-*.txt in the checkout are checked, since in the publish gate
+        the latter comes from git and can lag what is installed.
+        """
+        try:
+            installed = version("torch")
+        except PackageNotFoundError:
+            return
+
+        candidates = {c for c in self._repo_root.glob("constraints-*.txt")}
+        pip_conf = Path(sys.prefix) / "pip.conf"
+        if pip_conf.is_file():
+            for line in pip_conf.read_text(encoding="utf-8").splitlines():
+                name, sep, value = line.partition("=")
+                if sep and name.strip() == "constraint":
+                    candidates.add(Path(value.strip()))
+
+        for path in sorted(candidates):
+            if not path.is_file():
+                continue
+            for requirement in self._parse(path):
+                if requirement.name != "torch":
+                    continue
+                pinned = str(requirement.specifier).lstrip("=")
+                if pinned and pinned != installed:
+                    self._problems.append(
+                        f"{path.name} pins torch=={pinned} but torch {installed} "
+                        "is installed (regenerate the pin)"
+                    )
+
+    def _check_tuned_wheel_cuda(self) -> None:
+        """Check the tuned wheels were all built against one CUDA toolkit.
+
+        A tuned wheel carries its toolkit in its local version, e.g.
+        2.15.0+gb10.cu134.tuning.v34. Mixing cu133 and cu134 wheels in one venv
+        may work through CUDA minor-version compatibility or may fail in a
+        kernel path nothing here exercises, so require agreement.
+        """
+        found: dict[str, str] = {}
+        for dist in distributions():
+            name = dist.metadata["Name"]
+            if not name:
+                continue
+            match = re.search(r"\+[a-z0-9]+\.(cu\d+)", dist.version or "")
+            if match:
+                found[name] = match.group(1)
+        if not found:
+            return
+
+        # torch is the anchor: everything else must match the toolkit it was
+        # built against.
+        reference = found.get("torch")
+        if reference is not None:
+            for name, tag in sorted(found.items()):
+                if tag == reference:
+                    continue
+                reason = _ALLOWED_CUDA_MISMATCH.get(name)
+                if reason:
+                    print(f"  allowed: {name} is {tag}, torch is {reference} ({reason})")
+                    continue
+                self._problems.append(
+                    f"{name} is {tag} but torch is {reference} (rebuild it against {reference})"
+                )
+
+        tags = set(found.values())
+        # The toolkit the wheels name should be the one on this machine.
+        nvcc = shutil.which("nvcc")
+        if nvcc and len(tags) == 1:
+            result = subprocess.run(
+                [nvcc, "--version"], capture_output=True, text=True, check=False
+            )
+            release = re.search(r"release (\d+)\.(\d+)", result.stdout)
+            if release:
+                system_tag = f"cu{release.group(1)}{release.group(2)}"
+                wheel_tag = next(iter(tags))
+                if system_tag != wheel_tag:
+                    self._problems.append(
+                        f"tuned wheels are {wheel_tag} but nvcc on PATH is "
+                        f"{system_tag}"
+                    )
 
     def _check_pip_check(self) -> None:
         """Run `pip check`, ignoring the known-acceptable lines."""
@@ -169,13 +269,24 @@ class DependencyChecker:
         return None
 
     @staticmethod
+    def _default_repo_root() -> Path:
+        """Repo root for this script at comfyui/zbrad/scripts/check_deps.py.
+
+        Resolved lazily, and tolerant of the script sitting somewhere shallower
+        (a copy in /tmp, say), so --repo-root can still override it instead of
+        the parser failing to build.
+        """
+        here = Path(__file__).resolve()
+        return here.parents[3] if len(here.parents) > 3 else here.parent
+
+    @staticmethod
     def _build_arg_parser() -> argparse.ArgumentParser:
         """Build the command-line parser."""
         parser = argparse.ArgumentParser(description=__doc__)
         parser.add_argument(
             "--repo-root",
             type=Path,
-            default=Path(__file__).resolve().parents[3],
+            default=None,
             help="checkout to inspect (default: the one holding this script)",
         )
         parser.add_argument(
@@ -190,7 +301,7 @@ class DependencyChecker:
         """Entry point."""
         args = cls._build_arg_parser().parse_args(argv)
         checker = cls(
-            repo_root=args.repo_root,
+            repo_root=args.repo_root or cls._default_repo_root(),
             check_test_requirements=not args.skip_test_requirements,
         )
         return checker.run()
