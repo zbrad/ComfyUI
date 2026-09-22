@@ -4,4 +4,4 @@
 # gpu_tuned_protect_torch_pin (see https://github.com/zbrad/tuned-common) --
 # rerun it whenever the tuned torch wheel is rebuilt/reinstalled to refresh
 # this pin.
-torch==2.15.0+gb10.cu133.tuning.v29
+torch==2.15.0+gb10.cu134.tuning.v34
