@@ -6,9 +6,12 @@
 # gets swapped:
 #   .venv/bin/python -m pip install --no-deps -r comfyui/zbrad/requirements/custom-nodes.txt
 #
-# Left out on purpose: every nvidia-* wheel. The PyPI CUDA 13.0 libraries (cublas,
-# cudnn, ...) could shadow the system CUDA 13.4 the tuned torch uses, and
-# nvidia-ml-py is skipped to match Crystools' aarch64 marker.
+# Left out on purpose: the nvidia-* CUDA library wheels (cublas, cudnn, ...),
+# whose PyPI CUDA 13.0 builds could shadow the system CUDA 13.4 the tuned torch
+# uses. nvidia-ml-py is NOT one of those: it is a pure-python NVML binding
+# (py3-none-any) and it must be installed, because it provides the `pynvml`
+# module Crystools' GPU/VRAM monitor needs. Excluding it once left the monitor
+# reporting an empty GPU list, so the resource watcher logged no GPU stats.
 #
 # Four entries below are capped by a dependent, not held back by accident, so do
 # not bump them to latest: albucore (albumentations pins ==0.0.24),
@@ -22,6 +25,8 @@
 websocket-client==1.9.2
 
 # comfyui-crystools
+# nvidia-ml-py provides `pynvml`; on aarch64 Crystools reaches it via jetson-stats.
+nvidia-ml-py==13.610.43
 cachebox==5.2.3
 deepdiff==9.1.0
 distro==1.9.0
