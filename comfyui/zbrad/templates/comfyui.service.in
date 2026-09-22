@@ -9,10 +9,9 @@ WorkingDirectory=@RELEASES_ROOT@/current
 # Defaults are local-only; @SECRETS_FILE@ overrides them (see templates/comfy.example).
 Environment=COMFY_LISTEN_ADDR=127.0.0.1
 Environment=COMFY_PORT=8188
-Environment=COMFY_FRONTEND_ROOT=@FRONTEND_ROOT@
 Environment=COMFY_EXTRA_MODEL_PATHS=%h/.config/comfyui/extra_model_paths.yaml
 EnvironmentFile=-@SECRETS_FILE@
-ExecStart=@RELEASES_ROOT@/current/.venv/bin/python main.py --listen ${COMFY_LISTEN_ADDR} --port ${COMFY_PORT} --front-end-root ${COMFY_FRONTEND_ROOT} --extra-model-paths-config ${COMFY_EXTRA_MODEL_PATHS}
+ExecStart=@RELEASES_ROOT@/current/.venv/bin/python main.py --listen ${COMFY_LISTEN_ADDR} --port ${COMFY_PORT} --extra-model-paths-config ${COMFY_EXTRA_MODEL_PATHS}
 Restart=on-failure
 RestartSec=5
 StandardOutput=journal

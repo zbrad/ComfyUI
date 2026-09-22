@@ -166,7 +166,6 @@ install_model_paths() {
 
 render() {
     sed -e "s#@RELEASES_ROOT@#$RELEASES_ROOT#g" \
-        -e "s#@FRONTEND_ROOT@#$(dirname "$DEV_REPO")/ComfyUI_frontend/dist#g" \
         -e "s#@SECRETS_FILE@#$ZB_SECRETS_FILE#g" "$1"
 }
 

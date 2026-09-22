@@ -9,7 +9,6 @@ COMFY_LISTEN_ADDR=127.0.0.1
 # Optional overrides (defaults shown).
 # COMFY_PORT=8188
 # COMFY_TEST_PORT=8189
-# COMFY_FRONTEND_ROOT=<parent of the checkout>/ComfyUI_frontend/dist
 
 # Model-folders file passed to ComfyUI as --extra-model-paths-config, by the
 # service and by test-and-publish.sh. Use an absolute path: systemd does not

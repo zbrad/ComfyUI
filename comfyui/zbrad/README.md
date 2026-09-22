@@ -48,7 +48,6 @@ by the scripts. Everything else is derived from where the checkout lives.
 | `COMFY_LISTEN_ADDR` | `127.0.0.1` | address ComfyUI listens on |
 | `COMFY_PORT` | `8188` | service port |
 | `COMFY_TEST_PORT` | `8189` | isolated port for `test-and-publish.sh` |
-| `COMFY_FRONTEND_ROOT` | `<checkout parent>/ComfyUI_frontend/dist` | `--front-end-root` |
 | `COMFY_EXTRA_MODEL_PATHS` | `~/.config/comfyui/extra_model_paths.yaml` | `--extra-model-paths-config`; absolute path in the settings file |
 
 `COMFY_SECRETS_FILE` overrides the file's location.
@@ -67,8 +66,14 @@ by the scripts. Everything else is derived from where the checkout lives.
   `resource_watcher.py` from the release root) must run `install.sh` and then
   restart before their next release cut, or the resource-watch unit will fail
   to find the script. `comfyui.service` itself is unaffected.
-- **`ComfyUI_frontend`'s `zbrad-local` branch** is based on v1.49.6; upstream now
-  pins a newer frontend, so rebase it before serving it with `--front-end-root`.
+- **The frontend is the packaged one.** ComfyUI serves the
+  `comfyui-frontend-package` version its own `requirements.txt` pins, so the
+  frontend always matches the backend. The units pass no `--front-end-root`.
+  `ComfyUI_frontend`'s `zbrad-local` branch (its "Download from Template
+  Source" feature) is based on v1.49.6 and is **not** served: the backend
+  rejected it as too old. To serve it again, rebase those commits onto the
+  pinned version, rebuild `dist/`, and add `--front-end-root <that dist>` back
+  to the unit template.
 - **`comfyui-first-run-setup`** is kept in `custom_nodes/` here and linked in by
   `install.sh`. It swaps ComfyUI's stock default graph for the LTX-2.5 Text to
   Video workflow, only on a browser's first visit and never over real work.
