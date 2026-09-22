@@ -24,6 +24,14 @@ comfyui/zbrad/scripts/install.sh --dry-run
 comfyui/zbrad/scripts/install.sh
 ```
 
+After the first `install.sh` on a new node, enable the units once so the
+service comes back after a reboot (linger must be on for the user, which
+`loginctl show-user "$USER" -p Linger` reports):
+
+```bash
+systemctl --user enable --now comfyui.service comfyui-resource-watch.service
+```
+
 `install.sh` is idempotent. It clones missing sibling repos and custom nodes
 (never switching an existing clone's branch), links the blueprints, copies the
 workflows, writes a default `~/.config/comfyui/extra_model_paths.yaml` if none

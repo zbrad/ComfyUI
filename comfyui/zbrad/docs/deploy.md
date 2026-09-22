@@ -41,6 +41,21 @@ rolling back to an old release commit does not roll back Python
 dependencies; if a release needs a different dependency set, rebuild/adjust
 the shared `.venv` separately.
 
+## Enabling the service
+
+`comfyui.service` and `comfyui-resource-watch.service` are systemd **user**
+units, so they need linger on for the user to survive a logout or reboot
+(`loginctl show-user "$USER" -p Linger`). `install.sh` renders them but never
+enables or starts anything; enable them once per node:
+
+```bash
+systemctl --user enable --now comfyui.service comfyui-resource-watch.service
+```
+
+The resource watcher is `BindsTo=comfyui.service`, so it stops and starts with
+the service. Deploys restart the service through `activate-release.sh` and do
+not need the units re-enabled.
+
 ## Model folders (`extra_model_paths.yaml`)
 
 `comfyui.service` and `test-and-publish.sh` both start ComfyUI with
