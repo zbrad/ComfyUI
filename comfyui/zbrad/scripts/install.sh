@@ -51,6 +51,16 @@ check_secrets() {
     fi
 }
 
+# install.sh renders the units but never enables them, so say plainly whether
+# they would come back after a reboot. Advisory: never fails the run.
+check_enabled() {
+    say "== Enabled at boot =="
+    local out
+    if out="$("$ZB_SCRIPTS_DIR/check_enabled.sh" 2>&1)"; then
+        while IFS= read -r line; do say "  ${line}"; done <<< "${out}"
+    fi
+}
+
 # sync_repos <manifest> <target-dir>: clone what is missing, report the rest.
 sync_repos() {
     local manifest="$1" target="$2" dir url branch dest cur
@@ -197,6 +207,7 @@ install_units() {
 }
 
 check_secrets
+check_enabled
 install_repos
 install_vendored_nodes
 install_blueprints
