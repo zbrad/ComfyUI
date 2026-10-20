@@ -65,7 +65,9 @@ by the scripts. Everything else is derived from where the checkout lives.
 
 - `constraints-gb10.txt`: `tuned-common.sh` regenerates it at the repo root, and
   the venv's `pip.conf` points at it.
-- `.mcp.json`: Claude Code only reads it from the repo root.
+- `.mcp.json`: moved to `rules_local/.mcp.json` (our own file; J5 keeps agent config off default-loaded paths), so
+  Claude Code no longer loads it. To use it, run Claude Code with `--mcp-config rules_local/.mcp.json`; its relative
+  server path then resolves from the repo root, not from `rules_local/`, so adjust it if the file is moved again.
 - `model_collision_guard.py` and its two lines in `main.py`: `main.py` imports it.
 - `.gitignore`: one added line for `generation-log.jsonl`.
 
