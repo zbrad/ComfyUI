@@ -13,7 +13,7 @@ import math
 
 import torch
 import torch.nn.functional as F
-import torchaudio
+import comfy.audio
 
 import nodes
 import comfy.model_management
@@ -24,6 +24,7 @@ import comfy.patcher_extension
 import comfy.utils
 import node_helpers
 from comfy.ldm.minimax.model import FRAME_PER_TOKEN, FRAME_RESCALE
+from comfy.ldm.minimax.vae import IMAGENET_MEAN
 from comfy_api.latest import ComfyExtension, io
 
 CANVAS_MULTIPLE = 32
@@ -76,7 +77,7 @@ def _encode_ref_audio(audio_vae, audio):
     sr = audio["sample_rate"]
     vae_sr = getattr(audio_vae, "audio_sample_rate", 32000)
     if sr != vae_sr:
-        waveform = torchaudio.functional.resample(waveform, sr, vae_sr)
+        waveform = comfy.audio.resample(waveform, sr, vae_sr)
     z = audio_vae.encode(waveform[:1].movedim(1, -1))  # [1, 32, 2, T]
     return z, z.shape[-1]
 
@@ -460,7 +461,12 @@ class MiniMaxH3FunControlPatch:
                     source = torch.zeros(frame_count, 3, height, width, dtype=visibility.dtype, device=visibility.device)
                 else:
                     source = self._fit_frames(self.source_video, frame_count, width, height)
-                masked_latent = self._encode(source * visibility.to(source.device), target_shape)
+                visibility = visibility.to(source.device)
+                masked = source * visibility
+                if self.model_patch.model.inpaint_post_norm:
+                    # the pixel the VAE normalizes to zero, i.e. holes at mid-gray instead of black
+                    masked += (1.0 - visibility) * torch.tensor(IMAGENET_MEAN, dtype=source.dtype, device=source.device).view(1, 3, 1, 1)
+                masked_latent = self._encode(masked, target_shape)
                 if hint is None:
                     hint = torch.zeros_like(masked_latent)
                 visibility_latent = F.interpolate(
@@ -615,6 +621,39 @@ class MiniMaxH3FunControlNetApply(io.ComfyNode):
         return io.NodeOutput(model_patched)
 
 
+class MiniMaxH3LatentUpscaleWithModel(io.ComfyNode):
+    @classmethod
+    def define_schema(cls):
+        return io.Schema(
+            node_id="MiniMaxH3LatentUpscaleWithModel",
+            display_name="MiniMax H3 Latent Upscale With Model",
+            category="model/latent/minimax",
+            description="Resizes the video of a MiniMax H3 latent with a latent upscale model; audio passes through unchanged.",
+            inputs=[
+                io.LatentUpscaleModel.Input("model"),
+                io.Latent.Input("samples"),
+                io.Int.Input("width", default=2560, min=32, max=nodes.MAX_RESOLUTION, step=32),
+                io.Int.Input("height", default=1440, min=32, max=nodes.MAX_RESOLUTION, step=32),
+            ],
+            outputs=[io.Latent.Output()],
+        )
+
+    @classmethod
+    def execute(cls, model, samples, width, height) -> io.NodeOutput:
+        latents = samples["samples"]
+        video = latents.tensors[0] if latents.is_nested else latents
+        size = (video.shape[2], height // 16, width // 16)
+        if size == tuple(video.shape[2:]):
+            return io.NodeOutput(samples)
+        comfy.model_management.load_models_gpu([model], memory_required=model.model.memory_required(video.shape, size))
+        upscaled = model.model(video.to(device=model.load_device, dtype=model.model_dtype()), size)
+        upscaled = upscaled.to(device=comfy.model_management.intermediate_device(), dtype=video.dtype)
+        out = samples.copy()
+        out["samples"] = comfy.nested_tensor.NestedTensor((upscaled, latents.tensors[1])) if latents.is_nested else upscaled
+        out.pop("noise_mask", None)
+        return io.NodeOutput(out)
+
+
 class MiniMaxH3Extension(ComfyExtension):
     async def get_node_list(self):
         return [
@@ -624,6 +663,7 @@ class MiniMaxH3Extension(ComfyExtension):
             MiniMaxH3ReferenceToVideo,
             MiniMaxH3SigmaShift,
             MiniMaxH3FunControlNetApply,
+            MiniMaxH3LatentUpscaleWithModel,
             ]
 
 
