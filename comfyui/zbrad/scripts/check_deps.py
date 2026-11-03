@@ -72,6 +72,16 @@ _ALLOWED_UNMET = {
     # LTX-2.5 workflow generates successfully on the installed ninja, checked
     # by the integration test in the publish gate.
     "comfyui-ltxvideo:ninja": "pin is over-tight; verified working",
+    # controlnet-aux 1.1.6 (2026-10) swapped `albumentations` for
+    # `albumentationsx` in requirements.txt. albumentationsx ships the same
+    # top-level `albumentations` package, so installing it would overwrite the
+    # installed albumentations 2.0.8 (MIT) with an AGPL-3.0-only build and force
+    # albucore to 0.2.21 (we hold it at 0.0.24 for albumentations' own pin).
+    # The only importers are the diffusion_edge/ and taming/data/ dataset
+    # modules, not the node wrappers, and every node imported cleanly on a test
+    # instance (2026-11-03). Not exercised by a generation, so revisit if a
+    # diffusion_edge node is ever used.
+    "comfyui-controlnet-aux:albumentationsx": "albumentations 2.0.8 provides the module; AGPL swap avoided",
 }
 
 
